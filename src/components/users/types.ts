@@ -1,0 +1,25 @@
+export type IUser = {
+  id: number
+  name: string
+  email: string
+  role: 'admin' | 'manager' | 'editor'
+  status: 'active' | 'inactive' | 'pending'
+  department: string | null
+  createdAt: string
+  updatedAt: string
+  lastLoginAt: string | null
+}
+
+export type IUsersResponse = {
+  items: IUser[]
+  pagination: {
+    page: number
+    limit: number
+    total: number
+    totalPages: number
+  }
+}
+
+export type ApiErrorResponse = {
+  message: string
+}
