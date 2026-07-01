@@ -12,12 +12,7 @@ export type IUser = {
 
 export type IUsersResponse = {
   items: IUser[]
-  pagination: {
-    page: number
-    limit: number
-    total: number
-    totalPages: number
-  }
+  pagination: PaginationMeta
 }
 
 export type ApiErrorResponse = {
@@ -28,4 +23,13 @@ export type UsersQuery = {
   keyword?: string
   role?: IUser['role'] | ''
   status?: IUser['status'] | ''
+  page: number
+  limit: number
+}
+
+export type PaginationMeta = {
+  page: number
+  limit: number
+  total: number
+  totalPages: number
 }
