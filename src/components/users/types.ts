@@ -17,6 +17,7 @@ export type IUsersResponse = {
 
 export type ApiErrorResponse = {
   message: string
+  errors?: Record<string, string>
 }
 
 export type UsersQuery = {
@@ -33,3 +34,14 @@ export type PaginationMeta = {
   total: number
   totalPages: number
 }
+
+export type CreateUserForm = {
+  name: string
+  email: string
+  password: string
+  role: IUser['role'] | ''
+  status: IUser['status'] | ''
+  department: string
+}
+
+export type CreateUserFormErrors = Partial<Record<keyof CreateUserForm, string>>

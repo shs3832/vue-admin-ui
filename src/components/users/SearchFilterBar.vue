@@ -62,6 +62,15 @@
           초기화
         </button>
       </div>
+      <div class="flex ml-auto">
+        <button
+          type="button"
+          class="rounded-md bg-primary px-4 py-2 text-sm font-medium text-white cursor-pointer"
+          @click="emit('createUser')"
+        >
+          사용자 생성
+        </button>
+      </div>
     </form>
   </section>
 </template>
@@ -83,6 +92,7 @@ const emit = defineEmits<{
   'update:searchStatus': [value: IUser['status'] | '']
   search: []
   reset: []
+  createUser: []
 }>()
 </script>
 

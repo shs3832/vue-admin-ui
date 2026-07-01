@@ -2,9 +2,10 @@ import AppShell from '@/components/layout/AppShell.vue'
 import DashboardView from '@/views/DashboardView.vue'
 import LoginView from '@/views/LoginView.vue'
 import ProductsView from '@/views/ProductsView.vue'
-import UsersView from '@/views/UsersView.vue'
+import UsersView from '@/views/users/UsersView.vue'
 import { useAuthStore } from '@/stores/auth'
 import { createRouter, createWebHistory } from 'vue-router'
+import UserCreateView from '@/views/users/create/UserCreateView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -25,6 +26,11 @@ const router = createRouter({
           path: 'users',
           component: UsersView,
           name: 'users',
+        },
+        {
+          path: 'users/create',
+          component: UserCreateView,
+          name: 'userCreate',
         },
         {
           path: 'products',

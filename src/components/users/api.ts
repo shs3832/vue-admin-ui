@@ -1,4 +1,4 @@
-import type { UsersQuery } from './types'
+import type { CreateUserForm, UsersQuery } from './types'
 
 export const fetchUsersApi = async (accessToken: string, query: UsersQuery) => {
   const params = new URLSearchParams()
@@ -24,5 +24,19 @@ export const fetchUsersApi = async (accessToken: string, query: UsersQuery) => {
       Authorization: `Bearer ${accessToken}`,
     },
   })
+  return response
+}
+
+export const createUserApi = async (accessToken: string, payload: CreateUserForm) => {
+  const body = JSON.stringify(payload)
+  const response = await fetch(`${import.meta.env.VITE_APP_API_URL}/api/users`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${accessToken}`,
+    },
+    body,
+  })
+
   return response
 }

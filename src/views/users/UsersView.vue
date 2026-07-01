@@ -6,6 +6,7 @@
       v-model:searchStatus="searchStatus"
       @search="handleSearch"
       @reset="handleResetSearch"
+      @createUser="handleCreateUser"
     />
 
     <p v-if="errorMessage">{{ errorMessage }}</p>
@@ -58,9 +59,12 @@ import UserStatusBadge from '@/components/users/UserStatusBadge.vue'
 import { fetchUsersApi } from '@/components/users/api'
 import SearchFilterBar from '@/components/users/SearchFilterBar.vue'
 import PaginationBar from '@/components/users/PaginationBar.vue'
+import { useRouter } from 'vue-router'
+
 const thStyle = `border-b border-border px-4 py-3 text-left font-medium text-text-secondary`
 const tdStyle = `border-b border-border px-4 py-3`
 
+const router = useRouter()
 const authStore = useAuthStore()
 const isLoading = ref(false)
 const errorMessage = ref('')
@@ -125,9 +129,11 @@ const handleResetSearch = () => {
   loadUsersList()
 }
 
+const handleCreateUser = () => {
+  router.push({ name: 'userCreate' })
+}
+
 onMounted(() => {
   loadUsersList()
 })
 </script>
-
-<style scoped></style>

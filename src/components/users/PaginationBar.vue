@@ -7,7 +7,7 @@
       <button
         type="button"
         :class="styleButton"
-        @click="$emit('changePage', pagination.page - 1)"
+        @click="emit('changePage', pagination.page - 1)"
         :disabled="pagination.page === 1"
       >
         이전
@@ -15,7 +15,7 @@
       <button
         type="button"
         :class="styleButton"
-        @click="$emit('changePage', pagination.page + 1)"
+        @click="emit('changePage', pagination.page + 1)"
         :disabled="pagination.totalPages === pagination.page"
       >
         다음
@@ -31,7 +31,7 @@ const styleButton = `rounded-md border border-border-strong px-3 py-2 disabled:c
 defineProps<{
   pagination: PaginationMeta
 }>()
-defineEmits<{
+const emit = defineEmits<{
   changePage: [page: number]
 }>()
 </script>
