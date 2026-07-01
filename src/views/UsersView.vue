@@ -1,5 +1,12 @@
 <template>
   <div>
+    <SearchFilterBar
+      v-model:searchKeyword="searchKeyword"
+      v-model:searchRole="searchRole"
+      v-model:searchStatus="searchStatus"
+      @search="loadUsersList"
+      @reset="handleResetSearch"
+    />
     <p v-if="isLoading">로딩중</p>
     <p v-else-if="errorMessage">{{ errorMessage }}</p>
     <div v-else-if="users.length > 0">
@@ -33,10 +40,11 @@
 <script setup lang="ts">
 import { useAuthStore } from '@/stores/auth'
 import { onMounted, ref } from 'vue'
-import type { ApiErrorResponse, IUser, IUsersResponse } from '@/components/users/types'
+import type { ApiErrorResponse, IUser, IUsersResponse, UsersQuery } from '@/components/users/types'
 import UserRoleBadge from '@/components/users/UserRoleBadge.vue'
 import UserStatusBadge from '@/components/users/UserStatusBadge.vue'
 import { fetchUsersApi } from '@/components/users/api'
+import SearchFilterBar from '@/components/users/SearchFilterBar.vue'
 const thStyle = `border-b border-border px-4 py-3 text-left font-medium text-text-secondary`
 const tdStyle = `border-b border-border px-4 py-3`
 
@@ -44,11 +52,20 @@ const authStore = useAuthStore()
 const isLoading = ref(false)
 const errorMessage = ref('')
 const users = ref<IUser[]>([])
+const searchKeyword = ref('')
+const searchRole = ref<IUser['role'] | ''>('')
+const searchStatus = ref<IUser['status'] | ''>('')
+
 const loadUsersList = async () => {
   isLoading.value = true
   errorMessage.value = ''
+  const searchQuery: UsersQuery = {
+    keyword: searchKeyword.value,
+    role: searchRole.value,
+    status: searchStatus.value,
+  }
   try {
-    const response = await fetchUsersApi(authStore.accessToken)
+    const response = await fetchUsersApi(authStore.accessToken, searchQuery)
     const responseData = await response.json()
     if (!response.ok) {
       const errorData = responseData as ApiErrorResponse
@@ -62,6 +79,13 @@ const loadUsersList = async () => {
   } finally {
     isLoading.value = false
   }
+}
+
+const handleResetSearch = () => {
+  searchKeyword.value = ''
+  searchRole.value = ''
+  searchStatus.value = ''
+  loadUsersList()
 }
 
 onMounted(() => {

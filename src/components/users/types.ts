@@ -23,3 +23,9 @@ export type IUsersResponse = {
 export type ApiErrorResponse = {
   message: string
 }
+
+export type UsersQuery = {
+  keyword?: string
+  role?: IUser['role'] | ''
+  status?: IUser['status'] | ''
+}
