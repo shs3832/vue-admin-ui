@@ -1,0 +1,34 @@
+export type IProduct = {
+  id: number
+  name: string
+  category: string
+  price: number
+  status: 'selling' | 'hidden' | 'soldout'
+  stock: number
+  thumbnailUrl: string | null
+  description: string | null
+  createdAt: string
+  updatedAt: string
+}
+
+export type PaginationMeta = {
+  page: number
+  limit: number
+  total: number
+  totalPages: number
+}
+
+export type IProductsResponse = {
+  items: IProduct[]
+  pagination: PaginationMeta
+}
+
+export type ApiErrorResponse = {
+  message: string
+  errors?: Record<string, string>
+}
+
+export type ProductsQuery = {
+  page: number
+  limit: number
+}

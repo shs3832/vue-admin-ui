@@ -1,0 +1,121 @@
+<template>
+  <div>
+    <h2>상품목록</h2>
+    <p v-if="isInitialLoading">상품 목록을 불러오는 중입니다.</p>
+    <p v-else-if="errorMessage">{{ errorMessage }}</p>
+    <p v-else-if="isEmpty">표시할 상품이 없습니다.</p>
+    <div v-else>
+      <table class="w-full border-collapse text-sm">
+        <thead>
+          <tr>
+            <th :class="thStyle">이미지</th>
+            <th :class="thStyle">상품명</th>
+            <th :class="thStyle">카테고리</th>
+            <th :class="thStyle">가격</th>
+            <th :class="thStyle">재고</th>
+            <th :class="thStyle">상태</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-if="isTableLoading">
+            <td :class="[tdStyle, 'text-center']" colspan="6">제품목록을 불러오는 중입니다.</td>
+          </tr>
+          <tr v-for="product in products" :key="product.id">
+            <td :class="tdStyle">
+              <img
+                v-if="product.thumbnailUrl"
+                :src="product.thumbnailUrl"
+                :alt="product.name"
+                class="h-12 w-12 rounded-md object-cover"
+              />
+              <div
+                v-else
+                class="flex h-12 w-12 items-center justify-center rounded-md bg-muted text-xs text-text-secondary"
+              >
+                No image
+              </div>
+            </td>
+            <td :class="tdStyle">{{ product.name }}</td>
+            <td :class="tdStyle">{{ product.category }}</td>
+            <td :class="tdStyle">{{ product.price.toLocaleString() }}원</td>
+            <td :class="tdStyle">{{ product.stock }}</td>
+            <td :class="tdStyle">
+              <ProductStatusBadge :status="product.status" />
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <PaginationBar v-if="pagination" :pagination="pagination" @changePage="handleChangePage" />
+    </div>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { getProducts } from '@/components/products/api'
+import PaginationBar from '@/components/products/PaginationBar.vue'
+import ProductStatusBadge from '@/components/products/ProductStatusBadge.vue'
+import type {
+  PaginationMeta,
+  IProduct,
+  ApiErrorResponse,
+  IProductsResponse,
+  ProductsQuery,
+} from '@/components/products/types'
+import { useAuthStore } from '@/stores/auth'
+import { computed, onMounted, ref } from 'vue'
+
+const thStyle = `border-b border-border px-4 py-3 text-left font-medium text-text-secondary`
+const tdStyle = `border-b border-border px-4 py-3`
+
+const products = ref<IProduct[]>([])
+const pagination = ref<PaginationMeta | null>(null)
+const isLoading = ref(false)
+
+const errorMessage = ref('')
+const authStore = useAuthStore()
+const currentPage = ref(1)
+const limit = ref(10)
+const isEmpty = computed(() => {
+  return !isLoading.value && products.value.length === 0
+})
+const hasProducts = computed(() => {
+  return products.value.length > 0
+})
+const isInitialLoading = computed(() => isLoading.value && !hasProducts.value)
+const isTableLoading = computed(() => isLoading.value && hasProducts.value)
+
+const fetchProducts = async () => {
+  isLoading.value = true
+  errorMessage.value = ''
+  try {
+    const productQuery: ProductsQuery = {
+      page: currentPage.value,
+      limit: limit.value,
+    }
+    const response = await getProducts(authStore.accessToken, productQuery)
+    const responseData = await response.json()
+    if (!response.ok) {
+      const errorData = responseData as ApiErrorResponse
+      errorMessage.value = errorData.message || '제품목록 로딩에 실패했습니다.'
+      return
+    }
+    const successData = responseData as IProductsResponse
+    products.value = successData.items
+    pagination.value = successData.pagination
+  } catch (error) {
+    errorMessage.value =
+      error instanceof Error ? error.message : '제품목록 정보를 불러오지 못했습니다.'
+  } finally {
+    isLoading.value = false
+  }
+}
+
+const handleChangePage = (page: number) => {
+  currentPage.value = page
+  fetchProducts()
+}
+
+onMounted(() => {
+  fetchProducts()
+})
+</script>

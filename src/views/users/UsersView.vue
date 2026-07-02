@@ -91,7 +91,7 @@ import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
 
 const thStyle = `border-b border-border px-4 py-3 text-left font-medium text-text-secondary`
 const tdStyle = `border-b border-border px-4 py-3`
-const buttonDefaultStyle = `rounded-md border border-border-strong px-4 py-2 text-sm cursor-pointer disabled:cursor-not-allowed disabled:opacity-50`
+const buttonDefaultStyle = `rounded-md border border-border-strong px-2 py-1 text-sm cursor-pointer disabled:cursor-not-allowed disabled:opacity-50`
 const buttonDangerStyle = `${buttonDefaultStyle} bg-red-500 text-white border-red-500`
 
 const router = useRouter()

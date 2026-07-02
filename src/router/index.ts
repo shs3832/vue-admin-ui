@@ -1,7 +1,7 @@
 import AppShell from '@/components/layout/AppShell.vue'
 import DashboardView from '@/views/DashboardView.vue'
 import LoginView from '@/views/LoginView.vue'
-import ProductsView from '@/views/ProductsView.vue'
+import ProductsView from '@/views/products/ProductsView.vue'
 import UsersView from '@/views/users/UsersView.vue'
 import { useAuthStore } from '@/stores/auth'
 import { createRouter, createWebHistory } from 'vue-router'
