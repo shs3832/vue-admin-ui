@@ -7,6 +7,7 @@
       @search="handleSearch"
       @reset="handleResetSearch"
       @createUser="handleCreateUser"
+      :canManageUsers="canManageUsers"
     />
 
     <p v-if="errorMessage">{{ errorMessage }}</p>
@@ -21,11 +22,12 @@
             <th :class="thStyle">상태</th>
             <th :class="thStyle">부서</th>
             <th :class="thStyle">최근 로그인</th>
+            <th :class="thStyle">관리</th>
           </tr>
         </thead>
         <tbody>
           <tr v-if="isTableLoading">
-            <td :class="[tdStyle, 'text-center']" colspan="6">목록을 불러오는 중입니다.</td>
+            <td :class="[tdStyle, 'text-center']" colspan="7">목록을 불러오는 중입니다.</td>
           </tr>
           <tr v-for="item in users" :key="item.id">
             <td :class="tdStyle">{{ item.name }}</td>
@@ -34,6 +36,24 @@
             <td :class="tdStyle"><UserStatusBadge :status="item.status" /></td>
             <td :class="tdStyle">{{ item.department ?? '-' }}</td>
             <td :class="tdStyle">{{ item.lastLoginAt ?? '-' }}</td>
+            <td :class="tdStyle">
+              <button
+                v-if="canManageUsers"
+                :class="buttonDefaultStyle"
+                @click="handleEdit(item.id)"
+              >
+                수정
+              </button>
+              <button
+                v-if="canManageUsers"
+                type="button"
+                :class="[buttonDangerStyle, 'ml-2']"
+                @click="handleOpenDeleteDialog(item)"
+              >
+                삭제
+              </button>
+              <span class="text-sm text-text-secondary" v-else>권한없음</span>
+            </td>
           </tr>
         </tbody>
       </table>
@@ -41,6 +61,13 @@
     <p v-else>표시할 사용자가 없습니다.</p>
 
     <PaginationBar v-if="pagination" :pagination="pagination" @changePage="handleChangePage" />
+    <ConfirmDialog
+      :open="isDeleteDialogOpen"
+      :title="`삭제 확인`"
+      :description="`${selectUserForDelete?.name ?? '해당'} 사용자를 삭제하시겠습니까?`"
+      @confirm="handleConfirmDelete"
+      @cancel="handleCloseModal"
+    />
   </div>
 </template>
 
@@ -56,19 +83,23 @@ import type {
 } from '@/components/users/types'
 import UserRoleBadge from '@/components/users/UserRoleBadge.vue'
 import UserStatusBadge from '@/components/users/UserStatusBadge.vue'
-import { fetchUsersApi } from '@/components/users/api'
+import { deleteUserApi, fetchUsersApi } from '@/components/users/api'
 import SearchFilterBar from '@/components/users/SearchFilterBar.vue'
 import PaginationBar from '@/components/users/PaginationBar.vue'
 import { useRouter } from 'vue-router'
+import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
 
 const thStyle = `border-b border-border px-4 py-3 text-left font-medium text-text-secondary`
 const tdStyle = `border-b border-border px-4 py-3`
+const buttonDefaultStyle = `rounded-md border border-border-strong px-4 py-2 text-sm cursor-pointer disabled:cursor-not-allowed disabled:opacity-50`
+const buttonDangerStyle = `${buttonDefaultStyle} bg-red-500 text-white border-red-500`
 
 const router = useRouter()
 const authStore = useAuthStore()
 const isLoading = ref(false)
 const errorMessage = ref('')
 const users = ref<IUser[]>([])
+const selectUserForDelete = ref<IUser | null>(null)
 const searchKeyword = ref('')
 const searchRole = ref<IUser['role'] | ''>('')
 const searchStatus = ref<IUser['status'] | ''>('')
@@ -82,6 +113,11 @@ const pagination = ref<PaginationMeta | null>(null)
 const hasUsers = computed(() => users.value.length > 0)
 const isInitialLoading = computed(() => isLoading.value && !hasUsers.value)
 const isTableLoading = computed(() => isLoading.value && hasUsers.value)
+const isDeleteDialogOpen = computed(() => {
+  return selectUserForDelete.value !== null
+})
+const canManageUsers = computed(() => authStore.user?.role === 'admin')
+
 const loadUsersList = async () => {
   isLoading.value = true
   errorMessage.value = ''
@@ -131,6 +167,37 @@ const handleResetSearch = () => {
 
 const handleCreateUser = () => {
   router.push({ name: 'userCreate' })
+}
+
+const handleEdit = (id: number) => {
+  router.push({ name: 'userEdit', params: { id: id } })
+}
+
+const handleConfirmDelete = async () => {
+  if (!selectUserForDelete.value) return
+  const user = selectUserForDelete.value
+  try {
+    const response = await deleteUserApi(authStore.accessToken, user.id)
+    if (!response.ok) {
+      const errorData = (await response.json()) as ApiErrorResponse
+      errorMessage.value = errorData.message || '유저 정보를 삭제하지 못했습니다.'
+      selectUserForDelete.value = null
+      return
+    }
+    selectUserForDelete.value = null
+    loadUsersList()
+  } catch (error) {
+    selectUserForDelete.value = null
+    errorMessage.value = error instanceof Error ? error.message : '유저 정보를 삭제하지 못했습니다.'
+  }
+}
+
+const handleOpenDeleteDialog = (user: IUser) => {
+  selectUserForDelete.value = user
+}
+
+const handleCloseModal = () => {
+  selectUserForDelete.value = null
 }
 
 onMounted(() => {

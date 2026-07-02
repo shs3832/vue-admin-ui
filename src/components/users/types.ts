@@ -44,4 +44,18 @@ export type CreateUserForm = {
   department: string
 }
 
+export type UpdateUserForm = {
+  name: string
+  email: string
+  password?: string
+  role: IUser['role'] | ''
+  status: IUser['status'] | ''
+  department: string
+}
+
 export type CreateUserFormErrors = Partial<Record<keyof CreateUserForm, string>>
+export type UpdateUserFormErrors = Partial<Record<keyof UpdateUserForm, string>>
+
+export type IUserResponse = {
+  data: IUser
+}

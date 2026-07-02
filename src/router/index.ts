@@ -6,6 +6,7 @@ import UsersView from '@/views/users/UsersView.vue'
 import { useAuthStore } from '@/stores/auth'
 import { createRouter, createWebHistory } from 'vue-router'
 import UserCreateView from '@/views/users/create/UserCreateView.vue'
+import UserEditView from '@/views/users/edit/UserEditView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -31,6 +32,11 @@ const router = createRouter({
           path: 'users/create',
           component: UserCreateView,
           name: 'userCreate',
+        },
+        {
+          path: 'users/:id/edit',
+          component: UserEditView,
+          name: 'userEdit',
         },
         {
           path: 'products',

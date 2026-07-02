@@ -1,4 +1,4 @@
-import type { CreateUserForm, UsersQuery } from './types'
+import type { CreateUserForm, UpdateUserForm, UsersQuery } from './types'
 
 export const fetchUsersApi = async (accessToken: string, query: UsersQuery) => {
   const params = new URLSearchParams()
@@ -36,6 +36,45 @@ export const createUserApi = async (accessToken: string, payload: CreateUserForm
       Authorization: `Bearer ${accessToken}`,
     },
     body,
+  })
+
+  return response
+}
+
+export const getUserApi = async (accessToken: string, userId: number) => {
+  const response = await fetch(`${import.meta.env.VITE_APP_API_URL}/api/users/${userId}`, {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  })
+
+  return response
+}
+
+export const updateUserApi = async (
+  accessToken: string,
+  payload: UpdateUserForm,
+  userId: number,
+) => {
+  const body = JSON.stringify(payload)
+  const response = await fetch(`${import.meta.env.VITE_APP_API_URL}/api/users/${userId}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${accessToken}`,
+    },
+    body,
+  })
+
+  return response
+}
+
+export const deleteUserApi = async (accessToken: string, userId: number) => {
+  const response = await fetch(`${import.meta.env.VITE_APP_API_URL}/api/users/${userId}`, {
+    method: 'DELETE',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
   })
 
   return response

@@ -67,6 +67,7 @@
           type="button"
           class="rounded-md bg-primary px-4 py-2 text-sm font-medium text-white cursor-pointer"
           @click="emit('createUser')"
+          v-if="canManageUsers"
         >
           사용자 생성
         </button>
@@ -85,6 +86,7 @@ defineProps<{
   searchKeyword: string
   searchRole: IUser['role'] | ''
   searchStatus: IUser['status'] | ''
+  canManageUsers: boolean
 }>()
 const emit = defineEmits<{
   'update:searchKeyword': [value: string]
