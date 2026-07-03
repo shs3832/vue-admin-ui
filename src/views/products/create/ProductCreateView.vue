@@ -145,7 +145,6 @@ import type {
   ProductForm,
   ProductsFormErrors,
   CreateProductPayload,
-  UploadImageResponse,
 } from '@/components/products/types'
 import { useAuthStore } from '@/stores/auth'
 import { onUnmounted, ref } from 'vue'
@@ -180,6 +179,7 @@ const isLoading = ref(false)
 const uploadErrorMessage = ref('')
 const createErrorMessage = ref('')
 const fieldErrors = ref<ProductsFormErrors>({})
+const selectedFile = ref<File | null>(null)
 
 const formValidation = () => {
   const nextErrors: ProductsFormErrors = {}
@@ -210,30 +210,13 @@ const handleGetFile = async (event: Event) => {
   const file = input.files?.[0]
 
   if (!file) return
-  try {
-    isLoading.value = true
-    selectedFileName.value = file.name
-    if (previewImage.value) {
-      URL.revokeObjectURL(previewImage.value)
-    }
-
-    previewImage.value = URL.createObjectURL(file)
-    const response = await uploadProductImageApi(authStore.accessToken, file)
-    const responseData = await response.json()
-    if (!response.ok) {
-      const errorData = responseData as ApiErrorResponse
-      uploadErrorMessage.value = errorData.message || '파일 업로드에 실패했습니다.'
-      return
-    }
-    const successData = responseData as UploadImageResponse
-
-    form.value.thumbnailUrl = successData.data.url
-  } catch (error) {
-    uploadErrorMessage.value =
-      error instanceof Error ? error.message : '파일 업로드에 실패했습니다.'
-  } finally {
-    isLoading.value = false
+  selectedFile.value = file
+  selectedFileName.value = file.name
+  if (previewImage.value) {
+    URL.revokeObjectURL(previewImage.value)
   }
+
+  previewImage.value = URL.createObjectURL(file)
 }
 
 const handleSubmit = async () => {
@@ -243,10 +226,22 @@ const handleSubmit = async () => {
 
   try {
     isLoading.value = true
+
     const payload: CreateProductPayload = { ...form.value }
-    if (!payload.thumbnailUrl?.trim()) {
+    if (!payload.thumbnailUrl?.trim() && !selectedFile.value) {
       delete payload.thumbnailUrl
     }
+
+    if (selectedFile.value) {
+      const uploadResponse = await uploadProductImageApi(authStore.accessToken, selectedFile.value)
+      const uploadData = await uploadResponse.json()
+      if (!uploadResponse.ok) {
+        uploadErrorMessage.value = uploadData.message || '파일 업로드에 실패했습니다.'
+        return
+      }
+      payload.thumbnailUrl = uploadData.data.url
+    }
+
     if (!payload.description?.trim()) {
       delete payload.description
     }

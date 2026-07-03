@@ -1,7 +1,11 @@
 <template>
-  <div>
-    <h2>{{ title }}</h2>
-    <p>{{ description }}</p>
+  <div class="mb-6">
+    <h2 class="text-2xl font-bold text-text-primary">
+      {{ title }}
+    </h2>
+    <p v-if="description" class="mt-1 text-sm text-text-secondary">
+      {{ description }}
+    </p>
   </div>
 </template>
 
