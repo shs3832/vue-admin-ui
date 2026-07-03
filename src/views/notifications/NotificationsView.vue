@@ -1,0 +1,86 @@
+<template>
+  <div>
+    <p v-if="isLoading">알림 목록을 불러오는 중입니다.</p>
+    <p v-else-if="errorMessage">{{ errorMessage }}</p>
+    <p v-else-if="isEmpty">표시할 알림이 없습니다.</p>
+    <div v-else>
+      <ul class="space-y-3">
+        <li
+          v-for="notification in notifications"
+          :key="notification.id"
+          class="rounded-md border border-border bg-bg-surface p-4"
+        >
+          <div class="flex items-start justify-between gap-4">
+            <div>
+              <p class="text-sm font-semibold text-text-primary">
+                {{ notification.title }}
+              </p>
+              <p class="mt-1 text-sm text-text-secondary">
+                {{ notification.message }}
+              </p>
+            </div>
+
+            <p class="text-xs text-text-muted">
+              {{ formatDateTime(notification.createdAt) }}
+            </p>
+          </div>
+
+          <div class="mt-3 flex items-center gap-2">
+            <NotificationTypeBadge :type="notification.type" />
+            <span class="text-xs text-text-muted">
+              {{ notification.isRead ? '읽음' : '안읽음' }}
+            </span>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { fetchNotificationsApi } from '@/components/notifications/api'
+import NotificationTypeBadge from '@/components/notifications/NotificationTypeBadge.vue'
+import type {
+  ApiErrorResponse,
+  NotificationItem,
+  NotificationsResponse,
+  PaginationMeta,
+} from '@/components/notifications/types'
+import { useAuthStore } from '@/stores/auth'
+import { formatDateTime } from '@/utils/date'
+
+import { computed, onMounted, ref } from 'vue'
+
+const authStore = useAuthStore()
+const notifications = ref<NotificationItem[]>([])
+const pagination = ref<PaginationMeta | null>(null)
+const isLoading = ref(false)
+const errorMessage = ref('')
+const isEmpty = computed(() => {
+  return !isLoading.value && notifications.value.length === 0
+})
+const getNotifications = async () => {
+  isLoading.value = true
+  try {
+    const response = await fetchNotificationsApi(authStore.accessToken)
+    const responseData = await response.json()
+
+    if (!response.ok) {
+      const errorData = responseData as ApiErrorResponse
+      errorMessage.value = errorData.message || '알림 목록을 불러오지 못했습니다.'
+      return
+    }
+    const successData = responseData as NotificationsResponse
+    notifications.value = successData.items
+    pagination.value = successData.pagination
+  } catch (error) {
+    errorMessage.value = error instanceof Error ? error.message : '알림 정보를 불러오지 못했습니다.'
+  } finally {
+    isLoading.value = false
+  }
+}
+
+onMounted(() => {
+  getNotifications()
+})
+</script>

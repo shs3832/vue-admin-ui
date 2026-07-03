@@ -9,6 +9,8 @@ import UserCreateView from '@/views/users/create/UserCreateView.vue'
 import UserEditView from '@/views/users/edit/UserEditView.vue'
 import ProductCreateView from '@/views/products/create/ProductCreateView.vue'
 import ProductsEditView from '@/views/products/edit/ProductsEditView.vue'
+import NotificationsView from '@/views/notifications/NotificationsView.vue'
+import ActivityLogsView from '@/views/activity-logs/ActivityLogsView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -54,6 +56,16 @@ const router = createRouter({
           path: 'products/:id/edit',
           component: ProductsEditView,
           name: 'productEdit',
+        },
+        {
+          path: 'notifications',
+          component: NotificationsView,
+          name: 'notifications',
+        },
+        {
+          path: 'activity-logs',
+          component: ActivityLogsView,
+          name: 'activityLogs',
         },
       ],
     },

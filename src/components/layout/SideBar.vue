@@ -10,6 +10,12 @@
       <li>
         <RouterLink to="/products" :class="linkStyle"> Products </RouterLink>
       </li>
+      <li>
+        <RouterLink to="/notifications" :class="linkStyle"> Notifications </RouterLink>
+      </li>
+      <li>
+        <RouterLink to="/activity-logs" :class="linkStyle"> Activity Logs </RouterLink>
+      </li>
     </ul>
   </nav>
 </template>
