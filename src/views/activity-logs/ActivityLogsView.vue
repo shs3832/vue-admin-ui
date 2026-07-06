@@ -1,8 +1,12 @@
 <template>
   <div>
-    <p v-if="isLoading">활동 로그를 불러오는 중입니다.</p>
-    <p v-else-if="errorMessage">{{ errorMessage }}</p>
-    <p v-else-if="isEmpty">표시할 활동 로그가 없습니다.</p>
+    <LoadingState v-if="isLoading" message="활동 로그를 불러오는 중입니다." />
+    <ErrorState v-else-if="errorMessage" :message="errorMessage" @retry="getActivityLogs" />
+    <EmptyState v-else-if="isEmpty" title="표시할 활동 로그가 없습니다.">
+      <button type="button" :class="buttonPrimaryStyle" @click="getActivityLogs">
+        다시 불러오기
+      </button>
+    </EmptyState>
     <div v-else>
       <ul class="space-y-3">
         <li
@@ -46,7 +50,7 @@ import type { ActivityLogItem, ActivityLogsResponse } from '@/types/activityLogs
 import { useAuthStore } from '@/stores/auth'
 import { formatDateTime } from '@/utils/date'
 
-import { computed, onMounted, ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useListStatus } from '@/composables/useListStatus'
 
 const authStore = useAuthStore()
@@ -54,6 +58,7 @@ const activityLogs = ref<ActivityLogItem[]>([])
 const pagination = ref<PaginationMeta | null>(null)
 const isLoading = ref(false)
 const errorMessage = ref('')
+const buttonPrimaryStyle = `rounded-md bg-primary px-4 py-2 text-sm font-medium text-white cursor-pointer disabled:cursor-not-allowed disabled:opacity-50`
 
 const { isEmpty } = useListStatus(activityLogs, isLoading)
 const getActivityLogs = async () => {

@@ -1,8 +1,16 @@
 <template>
   <div>
-    <p v-if="isLoading">알림 목록을 불러오는 중입니다.</p>
-    <p v-else-if="errorMessage">{{ errorMessage }}</p>
-    <p v-else-if="isEmpty">표시할 알림이 없습니다.</p>
+    <LoadingState v-if="isLoading" message="알림 목록을 불러오는 중입니다." />
+    <ErrorState v-else-if="errorMessage" :message="errorMessage" @retry="getNotifications" />
+    <EmptyState
+      v-else-if="isEmpty"
+      title="표시할 알림이 없습니다."
+      description="알림이 있을경우 화면에 보여지게됩니다."
+    >
+      <button type="button" :class="buttonPrimaryStyle" @click="getNotifications">
+        다시 불러오기
+      </button>
+    </EmptyState>
     <div v-else>
       <ul class="space-y-3">
         <li
@@ -45,8 +53,9 @@ import type { NotificationItem, NotificationsResponse } from '@/types/notificati
 import { useAuthStore } from '@/stores/auth'
 import { formatDateTime } from '@/utils/date'
 
-import { computed, onMounted, ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useListStatus } from '@/composables/useListStatus'
+const buttonPrimaryStyle = `rounded-md bg-primary px-4 py-2 text-sm font-medium text-white cursor-pointer disabled:cursor-not-allowed disabled:opacity-50`
 
 const authStore = useAuthStore()
 const notifications = ref<NotificationItem[]>([])

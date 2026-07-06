@@ -1,8 +1,8 @@
 <template>
   <div>
     <h2>DashBoard</h2>
-    <p v-if="isLoading">로딩중</p>
-    <p v-else-if="errorMessage">{{ errorMessage }}</p>
+    <LoadingState v-if="isLoading" message="대시보드 정보를 불러오는 중입니다." />
+    <ErrorState v-else-if="errorMessage" :message="errorMessage" @retry="loadDashboardSummary" />
     <div v-else-if="summary" class="grid gap-4 md:grid-cols-2 xl:grid-cols-4 w-full">
       <SummaryCard
         v-for="item in summaryCardData"
@@ -12,7 +12,15 @@
         :key="item.title"
       />
     </div>
-    <p v-else>표시할 데이터가 없습니다.</p>
+    <EmptyState
+      v-else
+      title="불러올 데이터가 없습니다."
+      description="데이터가 준비되면 이곳에 표시됩니다."
+    >
+      <button type="button" :class="buttonPrimaryStyle" @click="loadDashboardSummary">
+        데이터 가져오기
+      </button>
+    </EmptyState>
   </div>
 </template>
 
@@ -24,8 +32,11 @@ import { fetchDashboardSummaryApi } from '@/api/dashboard'
 import type { ApiErrorResponse } from '@/types/api'
 import type { DashboardSummary, DashboardSummaryResponse, SummaryCardItem } from '@/types/dashboard'
 import { formatCurrency } from '@/utils/currency'
+import LoadingState from '@/components/ui/LoadingState.vue'
+import ErrorState from '@/components/ui/ErrorState.vue'
+import EmptyState from '@/components/ui/EmptyState.vue'
 const authStore = useAuthStore()
-
+const buttonPrimaryStyle = `rounded-md bg-primary px-4 py-2 text-sm font-medium text-white cursor-pointer disabled:cursor-not-allowed disabled:opacity-50`
 const summary = ref<DashboardSummary | null>(null)
 const isLoading = ref(false)
 const errorMessage = ref('')

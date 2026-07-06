@@ -10,9 +10,19 @@
         상품생성
       </button>
     </div>
-    <p v-if="isInitialLoading">상품 목록을 불러오는 중입니다.</p>
-    <p v-else-if="errorMessage">{{ errorMessage }}</p>
-    <p v-else-if="isEmpty">표시할 상품이 없습니다.</p>
+
+    <LoadingState v-if="isInitialLoading" message="상품목록을 불러오는 중입니다." />
+    <ErrorState v-else-if="errorMessage" :message="errorMessage" @retry="fetchProducts" />
+    <EmptyState
+      v-else-if="isEmpty"
+      title="표시할 상품이 없습니다."
+      description="상품을 생성하면 이 목록에 표시됩니다."
+    >
+      <button type="button" :class="buttonPrimaryStyle" @click="handleCreateProduct">
+        상품 생성
+      </button>
+    </EmptyState>
+
     <div v-else>
       <table class="w-full border-collapse text-sm">
         <thead>
@@ -73,10 +83,13 @@ import ProductStatusBadge from '@/components/products/ProductStatusBadge.vue'
 import type { PaginationMeta, ApiErrorResponse } from '@/types/api'
 import type { IProduct, IProductsResponse, ProductsQuery } from '@/types/products'
 import { useAuthStore } from '@/stores/auth'
-import { computed, onMounted, ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { formatCurrency } from '@/utils/currency'
 import { useListStatus } from '@/composables/useListStatus'
+import LoadingState from '@/components/ui/LoadingState.vue'
+import ErrorState from '@/components/ui/ErrorState.vue'
+import EmptyState from '@/components/ui/EmptyState.vue'
 
 const thStyle = `border-b border-border px-4 py-3 text-left font-medium text-text-secondary`
 const tdStyle = `border-b border-border px-4 py-3`

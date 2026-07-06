@@ -1,7 +1,11 @@
 <template>
   <div>
-    <p v-if="initLoading">상품 정보를 불러오는 중입니다.</p>
-    <p v-else-if="loadErrorMessage">{{ loadErrorMessage }}</p>
+    <LoadingState v-if="initLoading" message="상품 정보를 불러오는 중입니다." />
+    <ErrorState
+      v-else-if="loadErrorMessage"
+      :message="loadErrorMessage"
+      @retry="getProductDetail"
+    />
     <div v-else class="space-y-6">
       <div>
         <h2 class="text-2xl font-bold text-text-primary">상품 수정</h2>

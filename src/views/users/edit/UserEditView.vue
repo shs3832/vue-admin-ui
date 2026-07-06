@@ -2,8 +2,8 @@
   <div>
     <h2>사용자 수정</h2>
     <p>관리자 계정을 수정합니다.</p>
-    <p v-if="isLoading">사용자 정보를 불러오는 중입니다.</p>
-    <p v-else-if="loadErrorMessage">사용자정보를 가져오는데 실패했습니다.</p>
+    <LoadingState v-if="isLoading" message="사용자 정보를 불러오는 중입니다." />
+    <ErrorState v-else-if="loadErrorMessage" :message="loadErrorMessage" @retry="getUserInfo" />
     <form v-else class="space-y-4 py-4" @submit.prevent="handleEditSubmit">
       <div :class="boxStyle">
         <label for="" :class="labelStyle">이름 <small class="text-red-500">*</small></label>

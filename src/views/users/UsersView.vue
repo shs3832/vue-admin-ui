@@ -10,8 +10,8 @@
       :canManageUsers="canManageUsers"
     />
 
-    <p v-if="errorMessage">{{ errorMessage }}</p>
-    <p v-else-if="isInitialLoading">목록을 불러오는 중입니다.</p>
+    <LoadingState v-if="isInitialLoading" message="목록을 불러오는 중입니다." />
+    <ErrorState v-else-if="errorMessage" :message="errorMessage" @retry="loadUsersList" />
     <div v-else-if="hasUsers">
       <table class="w-full border-collapse text-sm">
         <thead>
@@ -60,7 +60,9 @@
         </tbody>
       </table>
     </div>
-    <p v-else>표시할 사용자가 없습니다.</p>
+    <EmptyState v-else title="표시할 유저가 없습니다." description="사용자를 등록해보세요">
+      <button type="button" :class="buttonPrimaryStyle" @click="handleCreateUser">유저 생성</button>
+    </EmptyState>
 
     <PaginationBar v-if="pagination" :pagination="pagination" @changePage="handleChangePage" />
     <ConfirmDialog
@@ -88,11 +90,15 @@ import { useRouter } from 'vue-router'
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
 import { formatDateTime } from '@/utils/date'
 import { useListStatus } from '@/composables/useListStatus'
+import ErrorState from '@/components/ui/ErrorState.vue'
+import EmptyState from '@/components/ui/EmptyState.vue'
+import LoadingState from '@/components/ui/LoadingState.vue'
 
 const thStyle = `border-b border-border px-4 py-3 text-left font-medium text-text-secondary`
 const tdStyle = `border-b border-border px-4 py-3`
 const buttonDefaultStyle = `rounded-md border border-border-strong px-2 py-1 text-sm cursor-pointer disabled:cursor-not-allowed disabled:opacity-50`
 const buttonDangerStyle = `${buttonDefaultStyle} bg-red-500 text-white border-red-500`
+const buttonPrimaryStyle = `rounded-md bg-primary px-4 py-2 text-sm font-medium text-white cursor-pointer hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50`
 
 const router = useRouter()
 const authStore = useAuthStore()

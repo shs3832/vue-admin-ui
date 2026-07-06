@@ -154,6 +154,7 @@ src/
     layout/
     notifications/
     products/
+    ui/
     users/
   composables/
     useListStatus.ts
@@ -212,7 +213,8 @@ npm run build
 - 이미지 업로드 UX 개선
 - 권한에 따른 UI 노출
 - loading/empty/error 상태 처리
-- API/type/formating/list state 책임 분리
+- API/type/formatting/list state 책임 분리
+- 공통 LoadingState/ErrorState/EmptyState UI 패턴 정리
 - 백엔드 응답 구조 기반 TypeScript 타입 정의
 - 읽기 전용 운영 로그/알림 화면 구현
 
@@ -220,7 +222,6 @@ npm run build
 
 - API fetch wrapper 또는 Axios instance 도입
 - access token 만료/refresh token 흐름 반영
-- 공통 LoadingState/ErrorState/EmptyState 컴포넌트 정리
 - PageHeader route meta 기반 공통화
 - SideBar active 메뉴 처리
 - Users/Products form 공통화
