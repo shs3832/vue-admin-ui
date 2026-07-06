@@ -85,6 +85,13 @@ VITE_APP_API_URL=http://localhost:5002
 - 날짜 formatting
 - loading/empty/error 상태 처리
 
+### Component Preview
+
+- 공통 UI 컴포넌트 미리보기 라우트
+- LoadingState/ErrorState/EmptyState 상태별 preview
+- Users/Products/Notifications badge variant 확인
+- 운영 화면과 분리된 내부 UI 확인 페이지
+
 ## Implementation Notes
 
 ### File Upload Flow
@@ -156,6 +163,8 @@ src/
     products/
     ui/
     users/
+  component-preview/
+    ComponentPreview.vue
   composables/
     useListStatus.ts
   router/
@@ -215,6 +224,7 @@ npm run build
 - loading/empty/error 상태 처리
 - API/type/formatting/list state 책임 분리
 - 공통 LoadingState/ErrorState/EmptyState UI 패턴 정리
+- Component Preview를 통한 공통 UI 상태와 badge variant 문서화
 - 백엔드 응답 구조 기반 TypeScript 타입 정의
 - 읽기 전용 운영 로그/알림 화면 구현
 

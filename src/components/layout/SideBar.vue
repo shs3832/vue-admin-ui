@@ -16,12 +16,14 @@
       <li>
         <RouterLink to="/activity-logs" :class="linkStyle"> Activity Logs </RouterLink>
       </li>
+      <li>
+        <RouterLink to="/component-preview" :class="linkStyle"> Components </RouterLink>
+      </li>
     </ul>
   </nav>
 </template>
 
 <script setup lang="ts">
-const activeLinkStyle = 'bg-bg-muted text-text-primary'
 const linkStyle =
   'block rounded-md px-3 py-2 text-sm font-medium text-text-secondary hover:bg-bg-muted hover:text-text-primary'
 </script>

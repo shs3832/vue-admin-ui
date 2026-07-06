@@ -11,6 +11,7 @@ import ProductCreateView from '@/views/products/create/ProductCreateView.vue'
 import ProductsEditView from '@/views/products/edit/ProductsEditView.vue'
 import NotificationsView from '@/views/notifications/NotificationsView.vue'
 import ActivityLogsView from '@/views/activity-logs/ActivityLogsView.vue'
+import ComponentPreview from '@/component-preview/ComponentPreview.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -66,6 +67,11 @@ const router = createRouter({
           path: 'activity-logs',
           component: ActivityLogsView,
           name: 'activityLogs',
+        },
+        {
+          path: 'component-preview',
+          component: ComponentPreview,
+          name: 'componentPreview',
         },
       ],
     },
