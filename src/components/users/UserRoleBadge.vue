@@ -5,7 +5,7 @@
 </template>
 
 <script setup lang="ts">
-import type { IUser } from './types'
+import type { IUser } from '@/types/users'
 
 const roleMap = {
   admin: '관리자',

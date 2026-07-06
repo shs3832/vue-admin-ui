@@ -79,13 +79,9 @@
 </template>
 
 <script setup lang="ts">
-import { getUserApi, updateUserApi } from '@/components/users/api'
-import type {
-  ApiErrorResponse,
-  IUserResponse,
-  UpdateUserForm,
-  UpdateUserFormErrors,
-} from '@/components/users/types'
+import { getUserApi, updateUserApi } from '@/api/users'
+import type { IUserResponse, UpdateUserForm, UpdateUserFormErrors } from '@/types/users'
+import type { ApiErrorResponse } from '@/types/api'
 import { useAuthStore } from '@/stores/auth'
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'

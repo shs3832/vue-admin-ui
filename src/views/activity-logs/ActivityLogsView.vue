@@ -39,27 +39,23 @@
 </template>
 
 <script setup lang="ts">
-import { fetchActivityLogsApi } from '@/components/activity-logs/api'
-import type {
-  ActivityLogItem,
-  ActivityLogsResponse,
-  ApiErrorResponse,
-  PaginationMeta,
-} from '@/components/activity-logs/types'
+import { fetchActivityLogsApi } from '@/api/activityLogs'
+import type { ApiErrorResponse, PaginationMeta } from '@/types/api'
+import type { ActivityLogItem, ActivityLogsResponse } from '@/types/activityLogs'
 
 import { useAuthStore } from '@/stores/auth'
 import { formatDateTime } from '@/utils/date'
 
 import { computed, onMounted, ref } from 'vue'
+import { useListStatus } from '@/composables/useListStatus'
 
 const authStore = useAuthStore()
 const activityLogs = ref<ActivityLogItem[]>([])
 const pagination = ref<PaginationMeta | null>(null)
 const isLoading = ref(false)
 const errorMessage = ref('')
-const isEmpty = computed(() => {
-  return !isLoading.value && activityLogs.value.length === 0
-})
+
+const { isEmpty } = useListStatus(activityLogs, isLoading)
 const getActivityLogs = async () => {
   isLoading.value = true
   try {

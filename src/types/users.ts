@@ -1,3 +1,5 @@
+import type { PaginationMeta } from './api'
+
 export type IUser = {
   id: number
   name: string
@@ -15,24 +17,12 @@ export type IUsersResponse = {
   pagination: PaginationMeta
 }
 
-export type ApiErrorResponse = {
-  message: string
-  errors?: Record<string, string>
-}
-
 export type UsersQuery = {
   keyword?: string
   role?: IUser['role'] | ''
   status?: IUser['status'] | ''
   page: number
   limit: number
-}
-
-export type PaginationMeta = {
-  page: number
-  limit: number
-  total: number
-  totalPages: number
 }
 
 export type CreateUserForm = {

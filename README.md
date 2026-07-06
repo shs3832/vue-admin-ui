@@ -124,22 +124,52 @@ formatDateTime("2026-06-24T00:00:00.000Z")
 
 날짜 표시 규칙을 한 곳에 모아 Notifications, Activity Logs 등에서 재사용할 수 있게 했습니다.
 
+금액 표시는 `src/utils/currency.ts`의 `formatCurrency` 유틸로 분리하여 상품 목록과 대시보드 매출 카드에서 같은 규칙을 사용합니다.
+
+### Structure Refactor
+
+Homework 13에서는 기능이 늘어나며 흩어지기 쉬운 API, type, formatting, list state 책임을 정리했습니다.
+
+- API 요청 함수는 `src/api`로 이동
+- TypeScript 타입 정의는 `src/types`로 이동
+- 날짜/금액 formatting은 `src/utils`에서 관리
+- 반복되는 list loading/empty 상태 계산은 `src/composables/useListStatus.ts`로 분리
+
+Pagination 상태는 반복 후보로 확인했지만, 아직 숫자 페이지네이션/limit 변경/URL query sync가 없으므로 view 안에 유지했습니다.
+
 ## Project Structure
 
 ```txt
 src/
+  api/
+    activityLogs.ts
+    auth.ts
+    dashboard.ts
+    notifications.ts
+    products.ts
+    users.ts
   components/
-    activity-logs/
     common/
     dashboard/
     layout/
     notifications/
     products/
     users/
+  composables/
+    useListStatus.ts
   router/
   stores/
   styles/
+  types/
+    activityLogs.ts
+    api.ts
+    dashboard.ts
+    notifications.ts
+    products.ts
+    users.ts
   utils/
+    currency.ts
+    date.ts
   views/
     activity-logs/
     notifications/
@@ -182,6 +212,7 @@ npm run build
 - 이미지 업로드 UX 개선
 - 권한에 따른 UI 노출
 - loading/empty/error 상태 처리
+- API/type/formating/list state 책임 분리
 - 백엔드 응답 구조 기반 TypeScript 타입 정의
 - 읽기 전용 운영 로그/알림 화면 구현
 
@@ -193,5 +224,5 @@ npm run build
 - PageHeader route meta 기반 공통화
 - SideBar active 메뉴 처리
 - Users/Products form 공통화
-- Pagination 타입과 API error 타입 공통화
+- 숫자 페이지네이션/limit 변경/URL query sync 도입 시 pagination composable 검토
 - README 최종 스크린샷/시연 이미지 추가

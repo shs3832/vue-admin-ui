@@ -1,3 +1,4 @@
+import { fetchMeApi } from '@/api/auth'
 import { defineStore } from 'pinia'
 
 type AuthUser = {
@@ -23,22 +24,15 @@ export const useAuthStore = defineStore('auth', {
       this.isCheckingAuth = true
       const accessToken = localStorage.getItem('accessToken')
       if (!accessToken) {
-        this.accessToken = ''
-        this.user = null
+        this.clearAuth()
         this.isCheckingAuth = false
         return
       }
       try {
-        const response = await fetch(`${import.meta.env.VITE_APP_API_URL}/api/auth/me`, {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        })
+        const response = await fetchMeApi(accessToken)
 
         if (!response.ok) {
-          this.accessToken = ''
-          this.user = null
-          localStorage.removeItem('accessToken')
+          this.clearAuth()
           return
         }
 
@@ -46,9 +40,7 @@ export const useAuthStore = defineStore('auth', {
         this.accessToken = accessToken
         this.user = data.data
       } catch (error) {
-        this.accessToken = ''
-        this.user = null
-        localStorage.removeItem('accessToken')
+        this.clearAuth()
         console.log(error)
       } finally {
         this.isCheckingAuth = false
@@ -56,6 +48,10 @@ export const useAuthStore = defineStore('auth', {
     },
 
     logout() {
+      this.clearAuth()
+    },
+
+    clearAuth() {
       this.accessToken = ''
       this.user = null
       localStorage.removeItem('accessToken')

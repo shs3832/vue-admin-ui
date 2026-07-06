@@ -1,4 +1,4 @@
-import type { ProductsQuery, CreateProductPayload, UpdateProductPayload } from './types'
+import type { ProductsQuery, CreateProductPayload, UpdateProductPayload } from '@/types/products'
 
 const baseUrl = `${import.meta.env.VITE_APP_API_URL}/api`
 

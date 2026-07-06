@@ -1,3 +1,5 @@
+import type { PaginationMeta } from './api'
+
 export type IProduct = {
   id: number
   name: string
@@ -11,21 +13,9 @@ export type IProduct = {
   updatedAt: string
 }
 
-export type PaginationMeta = {
-  page: number
-  limit: number
-  total: number
-  totalPages: number
-}
-
 export type IProductsResponse = {
   items: IProduct[]
   pagination: PaginationMeta
-}
-
-export type ApiErrorResponse = {
-  message: string
-  errors?: Record<string, string>
 }
 
 export type ProductsQuery = {

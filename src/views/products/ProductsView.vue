@@ -47,7 +47,7 @@
             </td>
             <td :class="tdStyle">{{ product.name }}</td>
             <td :class="tdStyle">{{ product.category }}</td>
-            <td :class="tdStyle">{{ product.price.toLocaleString() }}원</td>
+            <td :class="tdStyle">{{ formatCurrency(product.price) }}</td>
             <td :class="tdStyle">{{ product.stock }}</td>
             <td :class="tdStyle">
               <ProductStatusBadge :status="product.status" />
@@ -67,19 +67,16 @@
 </template>
 
 <script setup lang="ts">
-import { getProducts } from '@/components/products/api'
+import { getProducts } from '@/api/products'
 import PaginationBar from '@/components/products/PaginationBar.vue'
 import ProductStatusBadge from '@/components/products/ProductStatusBadge.vue'
-import type {
-  PaginationMeta,
-  IProduct,
-  ApiErrorResponse,
-  IProductsResponse,
-  ProductsQuery,
-} from '@/components/products/types'
+import type { PaginationMeta, ApiErrorResponse } from '@/types/api'
+import type { IProduct, IProductsResponse, ProductsQuery } from '@/types/products'
 import { useAuthStore } from '@/stores/auth'
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { formatCurrency } from '@/utils/currency'
+import { useListStatus } from '@/composables/useListStatus'
 
 const thStyle = `border-b border-border px-4 py-3 text-left font-medium text-text-secondary`
 const tdStyle = `border-b border-border px-4 py-3`
@@ -96,14 +93,7 @@ const authStore = useAuthStore()
 const currentPage = ref(1)
 const limit = ref(10)
 
-const isEmpty = computed(() => {
-  return !isLoading.value && products.value.length === 0
-})
-const hasProducts = computed(() => {
-  return products.value.length > 0
-})
-const isInitialLoading = computed(() => isLoading.value && !hasProducts.value)
-const isTableLoading = computed(() => isLoading.value && hasProducts.value)
+const { isEmpty, isInitialLoading, isTableLoading } = useListStatus(products, isLoading)
 
 const fetchProducts = async () => {
   isLoading.value = true

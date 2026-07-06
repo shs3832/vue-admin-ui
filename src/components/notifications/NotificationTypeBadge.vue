@@ -6,7 +6,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import type { NotificationTypeLabels, NotificationType } from './types'
+import type { NotificationTypeLabels, NotificationType } from '@/types/notifications'
 
 const props = defineProps<{ type: NotificationType }>()
 

@@ -6,7 +6,7 @@
 </template>
 
 <script setup lang="ts">
-import type { IProduct } from './types'
+import type { IProduct } from '@/types/products'
 
 const statusMap = {
   soldout: '품절',

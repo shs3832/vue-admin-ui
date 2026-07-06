@@ -20,13 +20,10 @@
 import SummaryCard from '@/components/dashboard/SummaryCard.vue'
 import { useAuthStore } from '@/stores/auth'
 import { computed, onMounted, ref } from 'vue'
-import { fetchDashboardSummaryApi } from '@/components/dashboard/api'
-import type {
-  ApiErrorResponse,
-  DashboardSummary,
-  DashboardSummaryResponse,
-  SummaryCardItem,
-} from '@/components/dashboard/types'
+import { fetchDashboardSummaryApi } from '@/api/dashboard'
+import type { ApiErrorResponse } from '@/types/api'
+import type { DashboardSummary, DashboardSummaryResponse, SummaryCardItem } from '@/types/dashboard'
+import { formatCurrency } from '@/utils/currency'
 const authStore = useAuthStore()
 
 const summary = ref<DashboardSummary | null>(null)
@@ -52,7 +49,7 @@ const summaryCardData = computed<SummaryCardItem[]>(() => {
     },
     {
       title: '월간 매출',
-      value: `${summary.value.revenue.monthly.toLocaleString()}원`,
+      value: formatCurrency(summary.value.revenue.monthly),
       description: '월간 누적 매출',
     },
   ]

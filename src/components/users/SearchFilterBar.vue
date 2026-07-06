@@ -77,7 +77,7 @@
 </template>
 
 <script setup lang="ts">
-import type { IUser } from './types'
+import type { IUser } from '@/types/users'
 
 const labelStyle = `text-sm font-medium text-text-secondary`
 const inputStyle = `rounded-md border border-border-strong px-3 py-2 text-sm`

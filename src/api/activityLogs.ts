@@ -1,4 +1,4 @@
-import type { ActivityLogsQuery } from './types'
+import type { ActivityLogsQuery } from '@/types/activityLogs'
 const baseUrl = `${import.meta.env.VITE_APP_API_URL}/api`
 export const fetchActivityLogsApi = async (
   accessToken: string,

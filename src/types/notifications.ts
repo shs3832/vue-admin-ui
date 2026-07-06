@@ -1,3 +1,5 @@
+import type { PaginationMeta } from './api'
+
 export type NotificationType = 'info' | 'warning' | 'error' | 'success'
 
 export type NotificationItem = {
@@ -8,12 +10,6 @@ export type NotificationItem = {
   type: NotificationType
   isRead: boolean
   createdAt: string
-}
-export type PaginationMeta = {
-  page: number
-  limit: number
-  total: number
-  totalPages: number
 }
 
 export type NotificationsResponse = {
@@ -26,11 +22,6 @@ export type NotificationsQuery = {
   limit: number
   keyword?: string
   isRead?: boolean
-}
-
-export type ApiErrorResponse = {
-  message: string
-  errors?: Record<string, string>
 }
 
 export type NotificationTypeLabels = Record<NotificationType, string>

@@ -35,7 +35,9 @@
             <td :class="tdStyle"><UserRoleBadge :role="item.role" /></td>
             <td :class="tdStyle"><UserStatusBadge :status="item.status" /></td>
             <td :class="tdStyle">{{ item.department ?? '-' }}</td>
-            <td :class="tdStyle">{{ item.lastLoginAt ?? '-' }}</td>
+            <td :class="tdStyle">
+              {{ item.lastLoginAt ? formatDateTime(item.lastLoginAt) : '-' }}
+            </td>
             <td :class="tdStyle">
               <button
                 v-if="canManageUsers"
@@ -74,20 +76,18 @@
 <script setup lang="ts">
 import { useAuthStore } from '@/stores/auth'
 import { computed, onMounted, ref } from 'vue'
-import type {
-  PaginationMeta,
-  ApiErrorResponse,
-  IUser,
-  IUsersResponse,
-  UsersQuery,
-} from '@/components/users/types'
+import type { PaginationMeta, ApiErrorResponse } from '@/types/api'
+import type { IUser, IUsersResponse, UsersQuery } from '@/types/users'
+
 import UserRoleBadge from '@/components/users/UserRoleBadge.vue'
 import UserStatusBadge from '@/components/users/UserStatusBadge.vue'
-import { deleteUserApi, fetchUsersApi } from '@/components/users/api'
+import { deleteUserApi, fetchUsersApi } from '@/api/users'
 import SearchFilterBar from '@/components/users/SearchFilterBar.vue'
 import PaginationBar from '@/components/users/PaginationBar.vue'
 import { useRouter } from 'vue-router'
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
+import { formatDateTime } from '@/utils/date'
+import { useListStatus } from '@/composables/useListStatus'
 
 const thStyle = `border-b border-border px-4 py-3 text-left font-medium text-text-secondary`
 const tdStyle = `border-b border-border px-4 py-3`
@@ -107,12 +107,7 @@ const currentPage = ref(1)
 const limit = ref(10)
 const pagination = ref<PaginationMeta | null>(null)
 
-// hasUsers: 보여줄 기존 목록이 있는가
-// isInitialLoading: 아직 목록이 없는데 로딩 중인가 (최초 로딩시 사용)
-// isTableLoading: 기존 목록이 있는데 새 요청 중인가 (로딩 후 목록이 있으면서 페이지네이션으로 넘어갈 시 활용)
-const hasUsers = computed(() => users.value.length > 0)
-const isInitialLoading = computed(() => isLoading.value && !hasUsers.value)
-const isTableLoading = computed(() => isLoading.value && hasUsers.value)
+const { hasItems: hasUsers, isInitialLoading, isTableLoading } = useListStatus(users, isLoading)
 const isDeleteDialogOpen = computed(() => {
   return selectUserForDelete.value !== null
 })

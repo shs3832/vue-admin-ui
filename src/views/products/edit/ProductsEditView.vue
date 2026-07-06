@@ -143,19 +143,16 @@
 </template>
 
 <script setup lang="ts">
-import {
-  getProductsDetailApi,
-  updateProductApi,
-  uploadProductImageApi,
-} from '@/components/products/api'
+import { getProductsDetailApi, updateProductApi, uploadProductImageApi } from '@/api/products'
+
+import type { ApiErrorResponse } from '@/types/api'
 import type {
-  ApiErrorResponse,
   ProductDetailResponse,
   ProductForm,
   ProductsFormErrors,
   UpdateProductPayload,
   UploadImageResponse,
-} from '@/components/products/types'
+} from '@/types/products'
 import { useAuthStore } from '@/stores/auth'
 import { onMounted, onUnmounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'

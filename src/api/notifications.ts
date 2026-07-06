@@ -1,4 +1,4 @@
-import type { NotificationsQuery } from './types'
+import type { NotificationsQuery } from '@/types/notifications'
 const baseUrl = `${import.meta.env.VITE_APP_API_URL}/api`
 export const fetchNotificationsApi = async (
   accessToken: string,

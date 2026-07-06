@@ -27,7 +27,3 @@ export type SummaryCardItem = {
 export type DashboardSummaryResponse = {
   data: DashboardSummary
 }
-
-export type ApiErrorResponse = {
-  message: string
-}

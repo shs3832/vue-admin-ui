@@ -25,8 +25,7 @@
 </template>
 
 <script setup lang="ts">
-import type { PaginationMeta } from './types'
-
+import type { PaginationMeta } from '@/types/api'
 const styleButton = `rounded-md border border-border-strong px-3 py-2 disabled:cursor-not-allowed disabled:opacity-50`
 defineProps<{
   pagination: PaginationMeta

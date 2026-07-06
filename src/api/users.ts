@@ -1,4 +1,4 @@
-import type { CreateUserForm, UpdateUserForm, UsersQuery } from './types'
+import type { CreateUserForm, UpdateUserForm, UsersQuery } from '@/types/users'
 
 export const fetchUsersApi = async (accessToken: string, query: UsersQuery) => {
   const params = new URLSearchParams()

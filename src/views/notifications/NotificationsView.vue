@@ -38,27 +38,23 @@
 </template>
 
 <script setup lang="ts">
-import { fetchNotificationsApi } from '@/components/notifications/api'
+import { fetchNotificationsApi } from '@/api/notifications'
 import NotificationTypeBadge from '@/components/notifications/NotificationTypeBadge.vue'
-import type {
-  ApiErrorResponse,
-  NotificationItem,
-  NotificationsResponse,
-  PaginationMeta,
-} from '@/components/notifications/types'
+import type { ApiErrorResponse, PaginationMeta } from '@/types/api'
+import type { NotificationItem, NotificationsResponse } from '@/types/notifications'
 import { useAuthStore } from '@/stores/auth'
 import { formatDateTime } from '@/utils/date'
 
 import { computed, onMounted, ref } from 'vue'
+import { useListStatus } from '@/composables/useListStatus'
 
 const authStore = useAuthStore()
 const notifications = ref<NotificationItem[]>([])
 const pagination = ref<PaginationMeta | null>(null)
 const isLoading = ref(false)
 const errorMessage = ref('')
-const isEmpty = computed(() => {
-  return !isLoading.value && notifications.value.length === 0
-})
+
+const { isEmpty } = useListStatus(notifications, isLoading)
 const getNotifications = async () => {
   isLoading.value = true
   try {

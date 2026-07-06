@@ -77,12 +77,9 @@
 </template>
 
 <script setup lang="ts">
-import { createUserApi } from '@/components/users/api'
-import type {
-  ApiErrorResponse,
-  CreateUserForm,
-  CreateUserFormErrors,
-} from '@/components/users/types'
+import { createUserApi } from '@/api/users'
+import type { ApiErrorResponse } from '@/types/api'
+import type { CreateUserForm, CreateUserFormErrors } from '@/types/users'
 import { useAuthStore } from '@/stores/auth'
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
