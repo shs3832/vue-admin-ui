@@ -77,6 +77,7 @@ const handleSubmit = async () => {
       headers: {
         'Content-Type': 'application/json',
       },
+      credentials: 'include',
       body,
     })
 
