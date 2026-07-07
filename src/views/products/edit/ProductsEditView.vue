@@ -154,6 +154,7 @@ import type { ProductForm, ProductsFormErrors, UpdateProductPayload } from '@/ty
 import { useAuthStore } from '@/stores/auth'
 import { onMounted, onUnmounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useAuthErrorHandler } from '@/composables/useAuthErrorHandler'
 
 const boxStyle = `flex flex-col gap-1`
 const labelStyle = `text-sm font-medium text-text-secondary`
@@ -165,6 +166,7 @@ const buttonPrimaryStyle = `rounded-md bg-primary px-4 py-2 text-sm font-medium 
 const buttonDefaultStyle = `rounded-md border border-border-strong px-4 py-2 text-sm cursor-pointer disabled:cursor-not-allowed disabled:opacity-50`
 const uploadButtonStyle = `inline-flex w-fit cursor-pointer items-center justify-center rounded-md border border-border-strong bg-bg-surface px-4 py-2 text-sm font-medium text-text-secondary hover:bg-bg-muted`
 
+const { handleAuthError } = useAuthErrorHandler()
 const route = useRoute()
 const router = useRouter()
 const authStore = useAuthStore()
@@ -243,6 +245,7 @@ const getProductDetail = async () => {
 
     previewImage.value = form.value?.thumbnailUrl || ''
   } catch (error) {
+    if (handleAuthError(error)) return
     if (isApiError(error)) {
       loadErrorMessage.value = error.message
       fieldErrors.value = error.fieldErrors ?? {}
@@ -274,6 +277,7 @@ const handleSubmit = async () => {
     await updateProductApi(authStore.accessToken, payload, productId)
     router.push({ name: 'products' })
   } catch (error) {
+    if (handleAuthError(error)) return
     if (isApiError(error)) {
       createErrorMessage.value = error.message
       fieldErrors.value = error.fieldErrors ?? {}

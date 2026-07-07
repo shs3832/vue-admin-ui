@@ -35,11 +35,13 @@ import { formatCurrency } from '@/utils/currency'
 import LoadingState from '@/components/ui/LoadingState.vue'
 import ErrorState from '@/components/ui/ErrorState.vue'
 import EmptyState from '@/components/ui/EmptyState.vue'
+import { useAuthErrorHandler } from '@/composables/useAuthErrorHandler'
 const authStore = useAuthStore()
 const buttonPrimaryStyle = `rounded-md bg-primary px-4 py-2 text-sm font-medium text-white cursor-pointer disabled:cursor-not-allowed disabled:opacity-50`
 const summary = ref<DashboardSummary | null>(null)
 const isLoading = ref(false)
 const errorMessage = ref('')
+const { handleAuthError } = useAuthErrorHandler()
 const summaryCardData = computed<SummaryCardItem[]>(() => {
   if (!summary.value) return []
   return [
@@ -73,6 +75,7 @@ const loadDashboardSummary = async () => {
     const response = await fetchDashboardSummaryApi(authStore.accessToken)
     summary.value = response.data
   } catch (error) {
+    if (handleAuthError(error)) return
     if (isApiError(error)) {
       errorMessage.value = error.message
     } else {

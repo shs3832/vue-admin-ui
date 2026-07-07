@@ -85,6 +85,7 @@ import { isApiError } from '@/types/api'
 import { useAuthStore } from '@/stores/auth'
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useAuthErrorHandler } from '@/composables/useAuthErrorHandler'
 
 const boxStyle = `flex flex-col gap-1`
 const labelStyle = `text-sm font-medium text-text-secondary`
@@ -112,6 +113,7 @@ const form = ref<UpdateUserForm>({
 })
 
 const fieldErrors = ref<UpdateUserFormErrors>({})
+const { handleAuthError } = useAuthErrorHandler()
 const formValidate = () => {
   const nextErrors: UpdateUserFormErrors = {}
   if (!form.value.name?.trim()) {
@@ -158,6 +160,7 @@ const getUserInfo = async () => {
     form.value.status = data.status
     form.value.department = data.department || ''
   } catch (error) {
+    if (handleAuthError(error)) return
     if (isApiError(error)) {
       errorMessage.value = error.message
       fieldErrors.value = error.fieldErrors ?? {}
@@ -186,6 +189,7 @@ const handleEditSubmit = async () => {
     await updateUserApi(authStore.accessToken, payload, getUserId)
     router.push({ name: 'users' })
   } catch (error) {
+    if (handleAuthError(error)) return
     if (isApiError(error)) {
       submitErrorMessage.value = error.message
       fieldErrors.value = error.fieldErrors ?? {}

@@ -93,6 +93,7 @@ import { useListStatus } from '@/composables/useListStatus'
 import ErrorState from '@/components/ui/ErrorState.vue'
 import EmptyState from '@/components/ui/EmptyState.vue'
 import LoadingState from '@/components/ui/LoadingState.vue'
+import { useAuthErrorHandler } from '@/composables/useAuthErrorHandler'
 
 const thStyle = `border-b border-border px-4 py-3 text-left font-medium text-text-secondary`
 const tdStyle = `border-b border-border px-4 py-3`
@@ -112,6 +113,7 @@ const searchStatus = ref<IUser['status'] | ''>('')
 const currentPage = ref(1)
 const limit = ref(10)
 const pagination = ref<PaginationMeta | null>(null)
+const { handleAuthError } = useAuthErrorHandler()
 
 const { hasItems: hasUsers, isInitialLoading, isTableLoading } = useListStatus(users, isLoading)
 const isDeleteDialogOpen = computed(() => {
@@ -135,6 +137,7 @@ const loadUsersList = async () => {
     users.value = response.items
     pagination.value = response.pagination
   } catch (error) {
+    if (handleAuthError(error)) return
     if (isApiError(error)) {
       errorMessage.value = error.message
     } else {
@@ -180,6 +183,7 @@ const handleConfirmDelete = async () => {
     loadUsersList()
   } catch (error) {
     selectUserForDelete.value = null
+    if (handleAuthError(error)) return
     if (isApiError(error)) {
       errorMessage.value = error.message
     } else {

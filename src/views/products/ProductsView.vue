@@ -90,12 +90,14 @@ import { useListStatus } from '@/composables/useListStatus'
 import LoadingState from '@/components/ui/LoadingState.vue'
 import ErrorState from '@/components/ui/ErrorState.vue'
 import EmptyState from '@/components/ui/EmptyState.vue'
+import { useAuthErrorHandler } from '@/composables/useAuthErrorHandler'
 
 const thStyle = `border-b border-border px-4 py-3 text-left font-medium text-text-secondary`
 const tdStyle = `border-b border-border px-4 py-3`
 const buttonPrimaryStyle = `rounded-md bg-primary px-4 py-2 text-sm font-medium text-white cursor-pointer hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50`
 const buttonDefaultStyle = `rounded-md border border-border-strong px-2 py-1 text-sm cursor-pointer disabled:cursor-not-allowed disabled:opacity-50`
 
+const { handleAuthError } = useAuthErrorHandler()
 const router = useRouter()
 const products = ref<IProduct[]>([])
 const pagination = ref<PaginationMeta | null>(null)
@@ -121,6 +123,7 @@ const fetchProducts = async () => {
     products.value = response.items
     pagination.value = response.pagination
   } catch (error) {
+    if (handleAuthError(error)) return
     if (isApiError(error)) {
       errorMessage.value = error.message
     } else {

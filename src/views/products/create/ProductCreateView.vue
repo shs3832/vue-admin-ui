@@ -146,6 +146,7 @@ import type { ProductForm, ProductsFormErrors, CreateProductPayload } from '@/ty
 import { useAuthStore } from '@/stores/auth'
 import { onUnmounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { useAuthErrorHandler } from '@/composables/useAuthErrorHandler'
 
 const boxStyle = `flex flex-col gap-1`
 const labelStyle = `text-sm font-medium text-text-secondary`
@@ -159,6 +160,7 @@ const uploadButtonStyle = `inline-flex w-fit cursor-pointer items-center justify
 
 const authStore = useAuthStore()
 const router = useRouter()
+const { handleAuthError } = useAuthErrorHandler()
 
 const form = ref<ProductForm>({
   name: '',
@@ -240,6 +242,7 @@ const handleSubmit = async () => {
     await createProductApi(authStore.accessToken, payload)
     router.push({ name: 'products' })
   } catch (error) {
+    if (handleAuthError(error)) return
     if (isApiError(error)) {
       createErrorMessage.value = error.message
       fieldErrors.value = error.fieldErrors ?? {}

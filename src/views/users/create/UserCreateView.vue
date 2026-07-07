@@ -83,6 +83,7 @@ import type { CreateUserForm, CreateUserFormErrors } from '@/types/users'
 import { useAuthStore } from '@/stores/auth'
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { useAuthErrorHandler } from '@/composables/useAuthErrorHandler'
 
 const boxStyle = `flex flex-col gap-1`
 const labelStyle = `text-sm font-medium text-text-secondary`
@@ -96,6 +97,7 @@ const isSubmitting = ref(false)
 const errorMessage = ref('')
 const router = useRouter()
 const authStore = useAuthStore()
+const { handleAuthError } = useAuthErrorHandler()
 
 const form = ref<CreateUserForm>({
   name: '',
@@ -152,6 +154,7 @@ const handleSubmit = async () => {
     await createUserApi(authStore.accessToken, form.value)
     router.push({ name: 'users' })
   } catch (error) {
+    if (handleAuthError(error)) return
     if (isApiError(error)) {
       errorMessage.value = error.message
       fieldErrors.value = error.fieldErrors ?? {}
