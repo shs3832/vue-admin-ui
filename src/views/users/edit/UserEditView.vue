@@ -3,7 +3,7 @@
     <h2>사용자 수정</h2>
     <p>관리자 계정을 수정합니다.</p>
     <LoadingState v-if="isLoading" message="사용자 정보를 불러오는 중입니다." />
-    <ErrorState v-else-if="loadErrorMessage" :message="loadErrorMessage" @retry="getUserInfo" />
+    <ErrorState v-else-if="errorMessage" :message="errorMessage" @retry="getUserInfo" />
     <form v-else class="space-y-4 py-4" @submit.prevent="handleEditSubmit">
       <div :class="boxStyle">
         <label for="" :class="labelStyle">이름 <small class="text-red-500">*</small></label>
@@ -80,8 +80,8 @@
 
 <script setup lang="ts">
 import { getUserApi, updateUserApi } from '@/api/users'
-import type { IUserResponse, UpdateUserForm, UpdateUserFormErrors } from '@/types/users'
-import type { ApiErrorResponse } from '@/types/api'
+import type { UpdateUserForm, UpdateUserFormErrors } from '@/types/users'
+import { isApiError } from '@/types/api'
 import { useAuthStore } from '@/stores/auth'
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
@@ -102,7 +102,7 @@ const getUserId = Number(route.params.id)
 const isLoading = ref(false)
 const submitErrorMessage = ref('')
 const isSubmitting = ref(false)
-const loadErrorMessage = ref('')
+const errorMessage = ref('')
 const form = ref<UpdateUserForm>({
   name: '',
   email: '',
@@ -144,28 +144,26 @@ const formValidate = () => {
 }
 const getUserInfo = async () => {
   if (Number.isNaN(getUserId)) {
-    loadErrorMessage.value = '잘못된 사용자 id 입니다.'
+    errorMessage.value = '잘못된 사용자 id 입니다.'
     return
   }
   isLoading.value = true
   try {
     const response = await getUserApi(authStore.accessToken, getUserId)
-    const responseData = await response.json()
 
-    if (!response.ok) {
-      const errorData = responseData as ApiErrorResponse
-      loadErrorMessage.value = errorData.message || '유저 정보가 없습니다.'
-      return
-    }
-    const { data } = responseData as IUserResponse
+    const { data } = response
     form.value.name = data.name
     form.value.email = data.email
     form.value.role = data.role
     form.value.status = data.status
     form.value.department = data.department || ''
   } catch (error) {
-    loadErrorMessage.value =
-      error instanceof Error ? error.message : '유저 정보를 불러오지 못했습니다.'
+    if (isApiError(error)) {
+      errorMessage.value = error.message
+      fieldErrors.value = error.fieldErrors ?? {}
+    } else {
+      errorMessage.value = '유저 정보를 불러오지 못했습니다.'
+    }
   } finally {
     isLoading.value = false
   }
@@ -185,47 +183,15 @@ const handleEditSubmit = async () => {
     if (!payload.password?.trim()) {
       delete payload.password
     }
-    const response = await updateUserApi(authStore.accessToken, payload, getUserId)
-    const responseData = await response.json()
-
-    if (!response.ok) {
-      const errorData = responseData as ApiErrorResponse
-      submitErrorMessage.value = errorData.message || '업데이트에 실패했습니다.'
-
-      if (errorData.errors) {
-        const nextErrors: UpdateUserFormErrors = {}
-
-        if (errorData.errors.name) {
-          nextErrors.name = errorData.errors.name
-        }
-
-        if (errorData.errors.email) {
-          nextErrors.email = errorData.errors.email
-        }
-
-        if (errorData.errors.password) {
-          nextErrors.password = errorData.errors.password
-        }
-
-        if (errorData.errors.role) {
-          nextErrors.role = errorData.errors.role
-        }
-
-        if (errorData.errors.status) {
-          nextErrors.status = errorData.errors.status
-        }
-
-        if (errorData.errors.department) {
-          nextErrors.department = errorData.errors.department
-        }
-
-        fieldErrors.value = nextErrors
-      }
-      return
-    }
+    await updateUserApi(authStore.accessToken, payload, getUserId)
     router.push({ name: 'users' })
   } catch (error) {
-    submitErrorMessage.value = error instanceof Error ? error.message : '수정에 실패했습니다.'
+    if (isApiError(error)) {
+      submitErrorMessage.value = error.message
+      fieldErrors.value = error.fieldErrors ?? {}
+    } else {
+      submitErrorMessage.value = '수정에 실패했습니다.'
+    }
   } finally {
     isSubmitting.value = false
   }

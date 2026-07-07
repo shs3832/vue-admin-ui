@@ -80,8 +80,8 @@
 import { getProducts } from '@/api/products'
 import PaginationBar from '@/components/products/PaginationBar.vue'
 import ProductStatusBadge from '@/components/products/ProductStatusBadge.vue'
-import type { PaginationMeta, ApiErrorResponse } from '@/types/api'
-import type { IProduct, IProductsResponse, ProductsQuery } from '@/types/products'
+import { isApiError, type PaginationMeta } from '@/types/api'
+import type { IProduct, ProductsQuery } from '@/types/products'
 import { useAuthStore } from '@/stores/auth'
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
@@ -117,18 +117,15 @@ const fetchProducts = async () => {
       limit: limit.value,
     }
     const response = await getProducts(authStore.accessToken, productQuery)
-    const responseData = await response.json()
-    if (!response.ok) {
-      const errorData = responseData as ApiErrorResponse
-      errorMessage.value = errorData.message || '제품목록 로딩에 실패했습니다.'
-      return
-    }
-    const successData = responseData as IProductsResponse
-    products.value = successData.items
-    pagination.value = successData.pagination
+
+    products.value = response.items
+    pagination.value = response.pagination
   } catch (error) {
-    errorMessage.value =
-      error instanceof Error ? error.message : '제품목록 정보를 불러오지 못했습니다.'
+    if (isApiError(error)) {
+      errorMessage.value = error.message
+    } else {
+      errorMessage.value = '상품 목록을 불러오지 못했습니다.'
+    }
   } finally {
     isLoading.value = false
   }

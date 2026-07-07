@@ -141,7 +141,7 @@
 <script setup lang="ts">
 import { createProductApi, uploadProductImageApi } from '@/api/products'
 
-import type { ApiErrorResponse } from '@/types/api'
+import { isApiError } from '@/types/api'
 import type { ProductForm, ProductsFormErrors, CreateProductPayload } from '@/types/products'
 import { useAuthStore } from '@/stores/auth'
 import { onUnmounted, ref } from 'vue'
@@ -231,48 +231,21 @@ const handleSubmit = async () => {
 
     if (selectedFile.value) {
       const uploadResponse = await uploadProductImageApi(authStore.accessToken, selectedFile.value)
-      const uploadData = await uploadResponse.json()
-      if (!uploadResponse.ok) {
-        uploadErrorMessage.value = uploadData.message || '파일 업로드에 실패했습니다.'
-        return
-      }
-      payload.thumbnailUrl = uploadData.data.url
+      payload.thumbnailUrl = uploadResponse.data.url
     }
 
     if (!payload.description?.trim()) {
       delete payload.description
     }
-    const response = await createProductApi(authStore.accessToken, payload)
-    const responseData = await response.json()
-    if (!response.ok) {
-      const errorData = responseData as ApiErrorResponse
-      createErrorMessage.value = errorData.message || '상품 생성에 실패했습니다.'
-      if (errorData.errors) {
-        const nextErrors: ProductsFormErrors = {}
-
-        if (errorData.errors.name) {
-          nextErrors.name = errorData.errors.name
-        }
-
-        if (errorData.errors.category) {
-          nextErrors.category = errorData.errors.category
-        }
-
-        if (errorData.errors.price) {
-          nextErrors.price = errorData.errors.price
-        }
-
-        if (errorData.errors.stock) {
-          nextErrors.stock = errorData.errors.stock
-        }
-
-        fieldErrors.value = nextErrors
-      }
-      return
-    }
+    await createProductApi(authStore.accessToken, payload)
     router.push({ name: 'products' })
   } catch (error) {
-    createErrorMessage.value = error instanceof Error ? error.message : '상품 생성에 실패했습니다.'
+    if (isApiError(error)) {
+      createErrorMessage.value = error.message
+      fieldErrors.value = error.fieldErrors ?? {}
+    } else {
+      createErrorMessage.value = '상품 생성에 실패했습니다.'
+    }
   } finally {
     isLoading.value = false
   }

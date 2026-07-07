@@ -149,14 +149,8 @@
 <script setup lang="ts">
 import { getProductsDetailApi, updateProductApi, uploadProductImageApi } from '@/api/products'
 
-import type { ApiErrorResponse } from '@/types/api'
-import type {
-  ProductDetailResponse,
-  ProductForm,
-  ProductsFormErrors,
-  UpdateProductPayload,
-  UploadImageResponse,
-} from '@/types/products'
+import { isApiError } from '@/types/api'
+import type { ProductForm, ProductsFormErrors, UpdateProductPayload } from '@/types/products'
 import { useAuthStore } from '@/stores/auth'
 import { onMounted, onUnmounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
@@ -237,26 +231,24 @@ const getProductDetail = async () => {
   initLoading.value = true
   try {
     const response = await getProductsDetailApi(authStore.accessToken, productId)
-    const responseData = await response.json()
 
-    if (!response.ok) {
-      const errorData = responseData as ApiErrorResponse
-      loadErrorMessage.value = errorData.message || '제품 정보를 불러오지 못했습니다.'
-      return
-    }
-    const successData = responseData as ProductDetailResponse
-    form.value.name = successData.data.name
-    form.value.category = successData.data.category
-    form.value.price = successData.data.price
-    form.value.status = successData.data.status
-    form.value.stock = successData.data.stock
-    form.value.thumbnailUrl = successData.data.thumbnailUrl
-    form.value.description = successData.data.description
+    const { data } = response
+    form.value.name = data.name
+    form.value.category = data.category
+    form.value.price = data.price
+    form.value.status = data.status
+    form.value.stock = data.stock
+    form.value.thumbnailUrl = data.thumbnailUrl
+    form.value.description = data.description
 
     previewImage.value = form.value?.thumbnailUrl || ''
   } catch (error) {
-    loadErrorMessage.value =
-      error instanceof Error ? error.message : '제품 정보를 불러오지 못했습니다.'
+    if (isApiError(error)) {
+      loadErrorMessage.value = error.message
+      fieldErrors.value = error.fieldErrors ?? {}
+    } else {
+      loadErrorMessage.value = '제품 정보를 불러오지 못했습니다.'
+    }
   } finally {
     initLoading.value = false
   }
@@ -272,51 +264,22 @@ const handleSubmit = async () => {
     const payload: UpdateProductPayload = { ...form.value }
     if (selectedFile.value) {
       const uploadResponse = await uploadProductImageApi(authStore.accessToken, selectedFile.value)
-      const uploadData = await uploadResponse.json()
 
-      if (!uploadResponse.ok) {
-        const errorData = uploadData as ApiErrorResponse
-        uploadErrorMessage.value = errorData.message || '파일 업로드에 실패했습니다.'
-        return
-      }
-      const successData = uploadData as UploadImageResponse
-      payload.thumbnailUrl = successData.data.url
+      payload.thumbnailUrl = uploadResponse.data.url
     }
     if (!payload.description?.trim()) {
       delete payload.description
     }
 
-    const response = await updateProductApi(authStore.accessToken, payload, productId)
-    const responseData = await response.json()
-    if (!response.ok) {
-      const errorData = responseData as ApiErrorResponse
-      createErrorMessage.value = errorData.message || '상품 수정에 실패했습니다.'
-      if (errorData.errors) {
-        const nextErrors: ProductsFormErrors = {}
-
-        if (errorData.errors.name) {
-          nextErrors.name = errorData.errors.name
-        }
-
-        if (errorData.errors.category) {
-          nextErrors.category = errorData.errors.category
-        }
-
-        if (errorData.errors.price) {
-          nextErrors.price = errorData.errors.price
-        }
-
-        if (errorData.errors.stock) {
-          nextErrors.stock = errorData.errors.stock
-        }
-
-        fieldErrors.value = nextErrors
-      }
-      return
-    }
+    await updateProductApi(authStore.accessToken, payload, productId)
     router.push({ name: 'products' })
   } catch (error) {
-    createErrorMessage.value = error instanceof Error ? error.message : '상품 수정에 실패했습니다.'
+    if (isApiError(error)) {
+      createErrorMessage.value = error.message
+      fieldErrors.value = error.fieldErrors ?? {}
+    } else {
+      createErrorMessage.value = '상품 수정에 실패했습니다.'
+    }
   } finally {
     isLoading.value = false
   }

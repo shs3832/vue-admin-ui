@@ -1,58 +1,40 @@
-import type { ProductsQuery, CreateProductPayload, UpdateProductPayload } from '@/types/products'
-
-const baseUrl = `${import.meta.env.VITE_APP_API_URL}/api`
+import type {
+  ProductsQuery,
+  CreateProductPayload,
+  UpdateProductPayload,
+  IProductsResponse,
+  ProductDetailResponse,
+  UploadImageResponse,
+} from '@/types/products'
+import { apiClient } from './client'
 
 export const getProducts = async (accessToken: string, query: ProductsQuery) => {
   const params = new URLSearchParams()
   params.set('limit', String(query.limit))
   params.set('page', String(query.page))
   const queryString = params.toString()
-  const url = queryString ? `${baseUrl}/products?${queryString}` : `${baseUrl}/products`
-  const response = await fetch(url, {
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
-  })
-  return response
+  const url = queryString ? `/products?${queryString}` : `/products`
+
+  return apiClient<IProductsResponse>(url, { accessToken })
 }
 
 export const uploadProductImageApi = async (accessToken: string, file: File) => {
   const body = new FormData()
   body.append('file', file)
 
-  const response = await fetch(`${baseUrl}/uploads`, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
-    body,
-  })
-
-  return response
+  return apiClient<UploadImageResponse>(`/uploads`, { method: 'POST', accessToken, body })
 }
 
 export const createProductApi = async (accessToken: string, payload: CreateProductPayload) => {
-  const body = JSON.stringify(payload)
-
-  const response = await fetch(`${baseUrl}/products`, {
+  return apiClient<ProductDetailResponse>(`/products`, {
     method: 'POST',
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-      'Content-Type': 'application/json',
-    },
-    body,
+    accessToken,
+    body: payload,
   })
-
-  return response
 }
 
 export const getProductsDetailApi = async (accessToken: string, id: number) => {
-  const response = await fetch(`${baseUrl}/products/${id}`, {
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
-  })
-  return response
+  return apiClient<ProductDetailResponse>(`/products/${id}`, { accessToken })
 }
 
 export const updateProductApi = async (
@@ -60,15 +42,9 @@ export const updateProductApi = async (
   payload: UpdateProductPayload,
   id: number,
 ) => {
-  const body = JSON.stringify(payload)
-  const response = await fetch(`${baseUrl}/products/${id}`, {
+  return apiClient<ProductDetailResponse>(`/products/${id}`, {
     method: 'PUT',
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-      'Content-Type': 'application/json',
-    },
-    body,
+    accessToken,
+    body: payload,
   })
-
-  return response
 }

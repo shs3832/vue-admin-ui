@@ -1,4 +1,11 @@
-import type { CreateUserForm, UpdateUserForm, UsersQuery } from '@/types/users'
+import {
+  type IUsersResponse,
+  type CreateUserForm,
+  type UpdateUserForm,
+  type UsersQuery,
+  type IUserResponse,
+} from '@/types/users'
+import { apiClient } from './client'
 
 export const fetchUsersApi = async (accessToken: string, query: UsersQuery) => {
   const params = new URLSearchParams()
@@ -15,40 +22,16 @@ export const fetchUsersApi = async (accessToken: string, query: UsersQuery) => {
   params.set('page', String(query.page))
   params.set('limit', String(query.limit))
   const queryString = params.toString()
-  const url = queryString
-    ? `${import.meta.env.VITE_APP_API_URL}/api/users?${queryString}`
-    : `${import.meta.env.VITE_APP_API_URL}/api/users`
-
-  const response = await fetch(url, {
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
-  })
-  return response
+  const url = queryString ? `/users?${queryString}` : `/users`
+  return apiClient<IUsersResponse>(url, { accessToken })
 }
 
 export const createUserApi = async (accessToken: string, payload: CreateUserForm) => {
-  const body = JSON.stringify(payload)
-  const response = await fetch(`${import.meta.env.VITE_APP_API_URL}/api/users`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${accessToken}`,
-    },
-    body,
-  })
-
-  return response
+  return apiClient<IUserResponse>(`/users`, { method: 'POST', accessToken, body: payload })
 }
 
 export const getUserApi = async (accessToken: string, userId: number) => {
-  const response = await fetch(`${import.meta.env.VITE_APP_API_URL}/api/users/${userId}`, {
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
-  })
-
-  return response
+  return apiClient<IUserResponse>(`/users/${userId}`, { accessToken })
 }
 
 export const updateUserApi = async (
@@ -56,26 +39,10 @@ export const updateUserApi = async (
   payload: UpdateUserForm,
   userId: number,
 ) => {
-  const body = JSON.stringify(payload)
-  const response = await fetch(`${import.meta.env.VITE_APP_API_URL}/api/users/${userId}`, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${accessToken}`,
-    },
-    body,
-  })
-
-  return response
+  return apiClient<IUserResponse>(`/users/${userId}`, { method: 'PUT', accessToken, body: payload })
 }
 
 export const deleteUserApi = async (accessToken: string, userId: number) => {
-  const response = await fetch(`${import.meta.env.VITE_APP_API_URL}/api/users/${userId}`, {
-    method: 'DELETE',
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
-  })
-
-  return response
+  const url = `/users/${userId}`
+  return apiClient<void>(url, { method: 'DELETE', accessToken })
 }

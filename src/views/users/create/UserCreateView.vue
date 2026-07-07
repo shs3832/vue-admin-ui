@@ -78,7 +78,7 @@
 
 <script setup lang="ts">
 import { createUserApi } from '@/api/users'
-import type { ApiErrorResponse } from '@/types/api'
+import { isApiError } from '@/types/api'
 import type { CreateUserForm, CreateUserFormErrors } from '@/types/users'
 import { useAuthStore } from '@/stores/auth'
 import { ref } from 'vue'
@@ -149,47 +149,15 @@ const handleSubmit = async () => {
     return
   }
   try {
-    const response = await createUserApi(authStore.accessToken, form.value)
-    const responseData = await response.json()
-    if (!response.ok) {
-      const errorData = responseData as ApiErrorResponse
-      errorMessage.value = errorData.message || '사용자 생성에 실패했습니다.'
-
-      if (errorData.errors) {
-        const nextErrors: CreateUserFormErrors = {}
-
-        if (errorData.errors.name) {
-          nextErrors.name = errorData.errors.name
-        }
-
-        if (errorData.errors.email) {
-          nextErrors.email = errorData.errors.email
-        }
-
-        if (errorData.errors.password) {
-          nextErrors.password = errorData.errors.password
-        }
-
-        if (errorData.errors.role) {
-          nextErrors.role = errorData.errors.role
-        }
-
-        if (errorData.errors.status) {
-          nextErrors.status = errorData.errors.status
-        }
-
-        if (errorData.errors.department) {
-          nextErrors.department = errorData.errors.department
-        }
-
-        fieldErrors.value = nextErrors
-      }
-      return
-    }
-
+    await createUserApi(authStore.accessToken, form.value)
     router.push({ name: 'users' })
   } catch (error) {
-    errorMessage.value = error instanceof Error ? error.message : '유저 정보를 불러오지 못했습니다.'
+    if (isApiError(error)) {
+      errorMessage.value = error.message
+      fieldErrors.value = error.fieldErrors ?? {}
+    } else {
+      errorMessage.value = '사용자 생성에 실패했습니다.'
+    }
   } finally {
     isSubmitting.value = false
   }

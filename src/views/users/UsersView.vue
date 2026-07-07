@@ -78,8 +78,8 @@
 <script setup lang="ts">
 import { useAuthStore } from '@/stores/auth'
 import { computed, onMounted, ref } from 'vue'
-import type { PaginationMeta, ApiErrorResponse } from '@/types/api'
-import type { IUser, IUsersResponse, UsersQuery } from '@/types/users'
+import { type PaginationMeta, isApiError } from '@/types/api'
+import type { IUser, UsersQuery } from '@/types/users'
 
 import UserRoleBadge from '@/components/users/UserRoleBadge.vue'
 import UserStatusBadge from '@/components/users/UserStatusBadge.vue'
@@ -132,17 +132,14 @@ const loadUsersList = async () => {
   }
   try {
     const response = await fetchUsersApi(authStore.accessToken, searchQuery)
-    const responseData = await response.json()
-    if (!response.ok) {
-      const errorData = responseData as ApiErrorResponse
-      errorMessage.value = errorData.message || '유저 정보가 없습니다.'
-      return
-    }
-    const successData = responseData as IUsersResponse
-    users.value = successData.items
-    pagination.value = successData.pagination
+    users.value = response.items
+    pagination.value = response.pagination
   } catch (error) {
-    errorMessage.value = error instanceof Error ? error.message : '유저 정보를 불러오지 못했습니다.'
+    if (isApiError(error)) {
+      errorMessage.value = error.message
+    } else {
+      errorMessage.value = '유저 정보를 불러오지 못했습니다.'
+    }
   } finally {
     isLoading.value = false
   }
@@ -178,18 +175,16 @@ const handleConfirmDelete = async () => {
   if (!selectUserForDelete.value) return
   const user = selectUserForDelete.value
   try {
-    const response = await deleteUserApi(authStore.accessToken, user.id)
-    if (!response.ok) {
-      const errorData = (await response.json()) as ApiErrorResponse
-      errorMessage.value = errorData.message || '유저 정보를 삭제하지 못했습니다.'
-      selectUserForDelete.value = null
-      return
-    }
+    await deleteUserApi(authStore.accessToken, user.id)
     selectUserForDelete.value = null
     loadUsersList()
   } catch (error) {
     selectUserForDelete.value = null
-    errorMessage.value = error instanceof Error ? error.message : '유저 정보를 삭제하지 못했습니다.'
+    if (isApiError(error)) {
+      errorMessage.value = error.message
+    } else {
+      errorMessage.value = '유저 정보를 삭제하지 못했습니다.'
+    }
   }
 }
 
