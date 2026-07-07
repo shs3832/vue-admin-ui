@@ -11,6 +11,8 @@ export type PaginationMeta = {
   totalPages: number
 }
 
+// 함수로 작성하는 건 별도로 동작하는 객체를 만드는 느낌이고,
+// 클래스로 작성한 건 기존 Error에 API 에러 정보를 더해주는 느낌이라 function 대신 class 문법으로 작성
 // 백엔드 API 실패를 프론트에서 다루기 쉬운 형태로 표현하는 전용 에러
 export class ApiError extends Error {
   // HTTP 상태 코드: 400, 401, 403, 500 등
@@ -33,7 +35,7 @@ export class ApiError extends Error {
     errors?: Record<string, string>
     fieldErrors?: Record<string, string>
   }) {
-    // 기본 Error의 message를 설정한다.
+    // ApiError는 Error를 상속하므로, 먼저 부모 Error에 message를 전달해 기본 에러 객체를 초기화한다.
     super(message)
 
     // catch에서 어떤 종류의 에러인지 구분하기 위한 이름
