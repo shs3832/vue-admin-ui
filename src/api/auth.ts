@@ -1,8 +1,14 @@
+import type { LoginPayload, LoginResponse, MeResponse } from '@/types/auth'
+import { apiClient } from './client'
+
 export const fetchMeApi = async (accessToken: string) => {
-  const response = await fetch(`${import.meta.env.VITE_APP_API_URL}/api/auth/me`, {
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
+  return apiClient<MeResponse>(`/auth/me`, { accessToken })
+}
+
+export const loginApi = async (payload: LoginPayload) => {
+  return apiClient<LoginResponse>(`/auth/login`, {
+    method: 'POST',
+    body: payload,
+    credentials: 'include',
   })
-  return response
 }

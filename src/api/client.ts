@@ -25,6 +25,7 @@ export const apiClient = async <T>(path: string, options: ApiClientOptions = {})
     method: options.method ?? 'GET',
     headers,
     body: requestBody,
+    credentials: options.credentials,
   })
 
   if (response.status === 204) return undefined as T
@@ -47,4 +48,5 @@ type ApiClientOptions = {
   method?: string
   accessToken?: string
   body?: unknown
+  credentials?: RequestCredentials
 }

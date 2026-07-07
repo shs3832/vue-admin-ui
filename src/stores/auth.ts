@@ -1,13 +1,6 @@
 import { fetchMeApi } from '@/api/auth'
+import type { AuthUser } from '@/types/auth'
 import { defineStore } from 'pinia'
-
-type AuthUser = {
-  email: string
-  id: number
-  name: string
-  role: string
-  status: string
-}
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({ accessToken: '', user: null as AuthUser | null, isCheckingAuth: false }),
@@ -30,18 +23,10 @@ export const useAuthStore = defineStore('auth', {
       }
       try {
         const response = await fetchMeApi(accessToken)
-
-        if (!response.ok) {
-          this.clearAuth()
-          return
-        }
-
-        const data = await response.json()
         this.accessToken = accessToken
-        this.user = data.data
+        this.user = response.data
       } catch (error) {
         this.clearAuth()
-        console.log(error)
       } finally {
         this.isCheckingAuth = false
       }

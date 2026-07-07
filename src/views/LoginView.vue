@@ -52,8 +52,10 @@
   </div>
 </template>
 <script setup lang="ts">
+import { loginApi } from '@/api/auth'
 import router from '@/router'
 import { useAuthStore } from '@/stores/auth'
+import { isApiError } from '@/types/api'
 import { ref } from 'vue'
 
 const email = ref('')
@@ -71,26 +73,15 @@ const handleSubmit = async () => {
   isSubmitting.value = true
 
   try {
-    const body = JSON.stringify({ email: email.value, password: password.value })
-    const result = await fetch(`${import.meta.env.VITE_APP_API_URL}/api/auth/login`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      credentials: 'include',
-      body,
-    })
-
-    const responseData = await result.json()
-
-    if (!result.ok) {
-      errorMessage.value = responseData.message || '로그인에 실패했습니다.'
-      return
-    }
-    authStore.setAuth(responseData.data.accessToken, responseData.data.user)
+    const response = await loginApi({ email: email.value, password: password.value })
+    authStore.setAuth(response.data.accessToken, response.data.user)
     router.push(`/dashboard`)
   } catch (error) {
-    errorMessage.value = '로그인 중 에러가 발생했습니다.'
+    if (isApiError(error)) {
+      errorMessage.value = error.message
+    } else {
+      errorMessage.value = '로그인 중 에러가 발생했습니다.'
+    }
   } finally {
     isSubmitting.value = false
   }
