@@ -1,8 +1,6 @@
-export const fetchDashboardSummaryApi = async (accessToken: string) => {
-  const response = await fetch(`${import.meta.env.VITE_APP_API_URL}/api/dashboard/summary`, {
-    method: 'GET',
-    headers: { Authorization: `Bearer ${accessToken}` },
-  })
+import type { DashboardSummaryResponse } from '@/types/dashboard'
+import { apiClient } from './client'
 
-  return response
+export const fetchDashboardSummaryApi = async (accessToken: string) => {
+  return apiClient<DashboardSummaryResponse>(`/dashboard/summary`, { accessToken })
 }

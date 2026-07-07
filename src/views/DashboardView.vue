@@ -29,8 +29,8 @@ import SummaryCard from '@/components/dashboard/SummaryCard.vue'
 import { useAuthStore } from '@/stores/auth'
 import { computed, onMounted, ref } from 'vue'
 import { fetchDashboardSummaryApi } from '@/api/dashboard'
-import type { ApiErrorResponse } from '@/types/api'
-import type { DashboardSummary, DashboardSummaryResponse, SummaryCardItem } from '@/types/dashboard'
+import { isApiError } from '@/types/api'
+import type { DashboardSummary, SummaryCardItem } from '@/types/dashboard'
 import { formatCurrency } from '@/utils/currency'
 import LoadingState from '@/components/ui/LoadingState.vue'
 import ErrorState from '@/components/ui/ErrorState.vue'
@@ -71,17 +71,13 @@ const loadDashboardSummary = async () => {
   errorMessage.value = ''
   try {
     const response = await fetchDashboardSummaryApi(authStore.accessToken)
-    const responseData = await response.json()
-    if (!response.ok) {
-      const errorData = responseData as ApiErrorResponse
-      errorMessage.value = errorData.message || '대시보드 정보를 불러오는데 실패했습니다.'
-      return
-    }
-    const successData = responseData as DashboardSummaryResponse
-    summary.value = successData.data
+    summary.value = response.data
   } catch (error) {
-    errorMessage.value =
-      error instanceof Error ? error.message : '대시보드 정보를 불러오지 못했습니다.'
+    if (isApiError(error)) {
+      errorMessage.value = error.message
+    } else {
+      errorMessage.value = '대시보드 정보를 불러오지 못했습니다.'
+    }
   } finally {
     isLoading.value = false
   }

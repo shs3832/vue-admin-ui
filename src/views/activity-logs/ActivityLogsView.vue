@@ -44,8 +44,8 @@
 
 <script setup lang="ts">
 import { fetchActivityLogsApi } from '@/api/activityLogs'
-import type { ApiErrorResponse, PaginationMeta } from '@/types/api'
-import type { ActivityLogItem, ActivityLogsResponse } from '@/types/activityLogs'
+import { isApiError, type PaginationMeta } from '@/types/api'
+import type { ActivityLogItem } from '@/types/activityLogs'
 
 import { useAuthStore } from '@/stores/auth'
 import { formatDateTime } from '@/utils/date'
@@ -65,19 +65,14 @@ const getActivityLogs = async () => {
   isLoading.value = true
   try {
     const response = await fetchActivityLogsApi(authStore.accessToken)
-    const responseData = await response.json()
-
-    if (!response.ok) {
-      const errorData = responseData as ApiErrorResponse
-      errorMessage.value = errorData.message || '활동 로그를 불러오지 못했습니다.'
-      return
-    }
-    const successData = responseData as ActivityLogsResponse
-    activityLogs.value = successData.items
-    pagination.value = successData.pagination
+    activityLogs.value = response.items
+    pagination.value = response.pagination
   } catch (error) {
-    errorMessage.value =
-      error instanceof Error ? error.message : '활동 로그 정보를 불러오지 못했습니다.'
+    if (isApiError(error)) {
+      errorMessage.value = error.message
+    } else {
+      errorMessage.value = '활동 로그 정보를 불러오지 못했습니다.'
+    }
   } finally {
     isLoading.value = false
   }

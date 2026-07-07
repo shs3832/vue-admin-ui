@@ -48,8 +48,8 @@
 <script setup lang="ts">
 import { fetchNotificationsApi } from '@/api/notifications'
 import NotificationTypeBadge from '@/components/notifications/NotificationTypeBadge.vue'
-import type { ApiErrorResponse, PaginationMeta } from '@/types/api'
-import type { NotificationItem, NotificationsResponse } from '@/types/notifications'
+import { isApiError, type PaginationMeta } from '@/types/api'
+import type { NotificationItem } from '@/types/notifications'
 import { useAuthStore } from '@/stores/auth'
 import { formatDateTime } from '@/utils/date'
 
@@ -68,18 +68,14 @@ const getNotifications = async () => {
   isLoading.value = true
   try {
     const response = await fetchNotificationsApi(authStore.accessToken)
-    const responseData = await response.json()
-
-    if (!response.ok) {
-      const errorData = responseData as ApiErrorResponse
-      errorMessage.value = errorData.message || '알림 목록을 불러오지 못했습니다.'
-      return
-    }
-    const successData = responseData as NotificationsResponse
-    notifications.value = successData.items
-    pagination.value = successData.pagination
+    notifications.value = response.items
+    pagination.value = response.pagination
   } catch (error) {
-    errorMessage.value = error instanceof Error ? error.message : '알림 정보를 불러오지 못했습니다.'
+    if (isApiError(error)) {
+      errorMessage.value = error.message
+    } else {
+      errorMessage.value = '알림 정보를 불러오지 못했습니다.'
+    }
   } finally {
     isLoading.value = false
   }

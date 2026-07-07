@@ -1,5 +1,5 @@
-import type { ActivityLogsQuery } from '@/types/activityLogs'
-const baseUrl = `${import.meta.env.VITE_APP_API_URL}/api`
+import type { ActivityLogsQuery, ActivityLogsResponse } from '@/types/activityLogs'
+import { apiClient } from './client'
 export const fetchActivityLogsApi = async (
   accessToken: string,
   query: ActivityLogsQuery = { page: 1, limit: 10 },
@@ -13,11 +13,6 @@ export const fetchActivityLogsApi = async (
   }
 
   const queryString = params.toString()
-  const response = await fetch(`${baseUrl}/activity-logs?${queryString}`, {
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
-  })
 
-  return response
+  return apiClient<ActivityLogsResponse>(`/activity-logs?${queryString}`, { accessToken })
 }
