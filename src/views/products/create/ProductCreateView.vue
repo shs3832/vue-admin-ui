@@ -12,8 +12,11 @@
           type="text"
           placeholder="상품명 입력"
           v-model="form.name"
+          :aria-invalid="Boolean(fieldErrors.name)"
+          :aria-describedby="fieldErrors.name ? 'name-error' : undefined"
+          ref="nameInputRef"
         />
-        <p :class="errorStyle" v-if="fieldErrors.name">
+        <p :class="errorStyle" v-if="fieldErrors.name" id="name-error">
           {{ fieldErrors.name }}
         </p>
       </div>
@@ -28,8 +31,10 @@
           id="category"
           name="category"
           v-model="form.category"
+          :aria-invalid="Boolean(fieldErrors.category)"
+          :aria-describedby="fieldErrors.category ? 'category-error' : undefined"
         />
-        <p :class="errorStyle" v-if="fieldErrors.category">
+        <p :class="errorStyle" v-if="fieldErrors.category" id="category-error">
           {{ fieldErrors.category }}
         </p>
       </div>
@@ -44,8 +49,10 @@
           name="price"
           placeholder="가격 입력"
           v-model.number="form.price"
+          :aria-invalid="Boolean(fieldErrors.price)"
+          :aria-describedby="fieldErrors.price ? 'price-error' : undefined"
         />
-        <p :class="errorStyle" v-if="fieldErrors.price">
+        <p :class="errorStyle" v-if="fieldErrors.price" id="price-error">
           {{ fieldErrors.price }}
         </p>
       </div>
@@ -60,8 +67,10 @@
           name="stock"
           placeholder="재고 입력"
           v-model.number="form.stock"
+          :aria-invalid="Boolean(fieldErrors.stock)"
+          :aria-describedby="fieldErrors.stock ? 'stock-error' : undefined"
         />
-        <p :class="errorStyle" v-if="fieldErrors.stock">
+        <p :class="errorStyle" v-if="fieldErrors.stock" id="stock-error">
           {{ fieldErrors.stock }}
         </p>
       </div>
@@ -140,7 +149,7 @@ import { createProductApi, uploadProductImageApi } from '@/api/products'
 import { isApiError } from '@/types/api'
 import type { ProductForm, ProductsFormErrors, CreateProductPayload } from '@/types/products'
 import { useAuthStore } from '@/stores/auth'
-import { onUnmounted, ref } from 'vue'
+import { onMounted, onUnmounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthErrorHandler } from '@/composables/useAuthErrorHandler'
 
@@ -157,6 +166,7 @@ const uploadButtonStyle = `inline-flex w-fit cursor-pointer items-center justify
 const authStore = useAuthStore()
 const router = useRouter()
 const { handleAuthError } = useAuthErrorHandler()
+const nameInputRef = ref<HTMLInputElement | null>(null)
 
 const form = ref<ProductForm>({
   name: '',
@@ -249,6 +259,9 @@ const handleSubmit = async () => {
     isLoading.value = false
   }
 }
+onMounted(() => {
+  nameInputRef.value?.focus()
+})
 
 onUnmounted(() => {
   if (previewImage.value.startsWith('blob:')) {
