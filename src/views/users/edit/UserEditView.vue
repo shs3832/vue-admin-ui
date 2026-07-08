@@ -4,58 +4,102 @@
     <ErrorState v-else-if="errorMessage" :message="errorMessage" @retry="getUserInfo" />
     <form v-else class="space-y-4 py-4" @submit.prevent="handleEditSubmit">
       <div :class="boxStyle">
-        <label for="" :class="labelStyle">이름 <small class="text-red-500">*</small></label>
-        <input type="text" :class="inputStyle" v-model="form.name" />
-        <p v-if="fieldErrors.name" :class="errorStyle">
+        <label for="name" :class="labelStyle">이름 <small class="text-red-500">*</small></label>
+        <input
+          id="name"
+          name="name"
+          type="text"
+          :class="inputStyle"
+          v-model="form.name"
+          :aria-invalid="Boolean(fieldErrors.name)"
+          :aria-describedby="fieldErrors.name ? 'name-error' : undefined"
+        />
+        <p v-if="fieldErrors.name" :class="errorStyle" id="name-error">
           {{ fieldErrors.name }}
         </p>
       </div>
 
       <div :class="boxStyle">
-        <label for="" :class="labelStyle">이메일 <small class="text-red-500">*</small></label>
-        <input type="email" :class="inputStyle" v-model="form.email" />
-        <p v-if="fieldErrors.email" :class="errorStyle">
+        <label for="email" :class="labelStyle">이메일 <small class="text-red-500">*</small></label>
+        <input
+          id="email"
+          name="email"
+          type="email"
+          :class="inputStyle"
+          v-model="form.email"
+          :aria-invalid="Boolean(fieldErrors.email)"
+          :aria-describedby="fieldErrors.email ? 'email-error' : undefined"
+        />
+        <p v-if="fieldErrors.email" :class="errorStyle" id="email-error">
           {{ fieldErrors.email }}
         </p>
       </div>
 
       <div :class="boxStyle">
-        <label for="" :class="labelStyle">비밀번호 </label>
-        <input type="password" :class="inputStyle" v-model="form.password" />
-        <p v-if="fieldErrors.password" :class="errorStyle">
+        <label for="password" :class="labelStyle">비밀번호</label>
+        <input
+          id="password"
+          name="password"
+          type="password"
+          :class="inputStyle"
+          v-model="form.password"
+          :aria-invalid="Boolean(fieldErrors.password)"
+          :aria-describedby="fieldErrors.password ? 'password-error' : undefined"
+        />
+        <p v-if="fieldErrors.password" :class="errorStyle" id="password-error">
           {{ fieldErrors.password }}
         </p>
       </div>
 
       <div :class="boxStyle">
-        <label for="" :class="labelStyle">역할 <small class="text-red-500">*</small></label>
-        <select :class="selectStyle" v-model="form.role">
+        <label for="role" :class="labelStyle">역할 <small class="text-red-500">*</small></label>
+        <select
+          id="role"
+          name="role"
+          :class="selectStyle"
+          v-model="form.role"
+          :aria-invalid="Boolean(fieldErrors.role)"
+          :aria-describedby="fieldErrors.role ? 'role-error' : undefined"
+        >
           <option value="">역할 선택</option>
           <option value="admin">관리자</option>
           <option value="manager">매니저</option>
           <option value="editor">에디터</option>
         </select>
-        <p v-if="fieldErrors.role" :class="errorStyle">
+        <p v-if="fieldErrors.role" :class="errorStyle" id="role-error">
           {{ fieldErrors.role }}
         </p>
       </div>
 
       <div :class="boxStyle">
-        <label for="" :class="labelStyle">상태 <small class="text-red-500">*</small></label>
-        <select :class="selectStyle" v-model="form.status">
+        <label for="status" :class="labelStyle">상태 <small class="text-red-500">*</small></label>
+        <select
+          id="status"
+          name="status"
+          :class="selectStyle"
+          v-model="form.status"
+          :aria-invalid="Boolean(fieldErrors.status)"
+          :aria-describedby="fieldErrors.status ? 'status-error' : undefined"
+        >
           <option value="">상태 선택</option>
           <option value="active">활성</option>
           <option value="inactive">비활성</option>
           <option value="pending">대기</option>
         </select>
-        <p v-if="fieldErrors.status" :class="errorStyle">
+        <p v-if="fieldErrors.status" :class="errorStyle" id="status-error">
           {{ fieldErrors.status }}
         </p>
       </div>
 
       <div :class="boxStyle">
-        <label for="" :class="labelStyle">부서</label>
-        <input type="text" :class="inputStyle" v-model="form.department" />
+        <label for="department" :class="labelStyle">부서</label>
+        <input
+          id="department"
+          name="department"
+          type="text"
+          :class="inputStyle"
+          v-model="form.department"
+        />
       </div>
 
       <div class="flex flex-wrap gap-3">
