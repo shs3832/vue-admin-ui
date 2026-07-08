@@ -133,6 +133,7 @@ import { useAuthStore } from '@/stores/auth'
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthErrorHandler } from '@/composables/useAuthErrorHandler'
+import { focusFirstErrorField } from '@/utils/focus'
 
 const boxStyle = `flex flex-col gap-1`
 const labelStyle = `text-sm font-medium text-text-secondary`
@@ -167,16 +168,7 @@ const form = ref<UpdateUserForm>({
 
 const fieldErrors = ref<UpdateUserFormErrors>({})
 const { handleAuthError } = useAuthErrorHandler()
-const focusFirstErrorField = (errors: UpdateUserFormErrors) => {
-  const errorFields = [
-    { error: errors.name, ref: nameInputRef },
-    { error: errors.email, ref: emailInputRef },
-    { error: errors.password, ref: passwordInputRef },
-    { error: errors.role, ref: roleSelectRef },
-    { error: errors.status, ref: statusSelectRef },
-  ]
-  errorFields.find((field) => field.error)?.ref.value?.focus()
-}
+
 const formValidate = () => {
   const nextErrors: UpdateUserFormErrors = {}
   if (!form.value.name?.trim()) {
@@ -204,8 +196,15 @@ const formValidate = () => {
   }
 
   fieldErrors.value = nextErrors
+
   if (Object.keys(nextErrors).length > 0) {
-    focusFirstErrorField(nextErrors)
+    focusFirstErrorField([
+      { error: nextErrors.name, ref: nameInputRef },
+      { error: nextErrors.email, ref: emailInputRef },
+      { error: nextErrors.password, ref: passwordInputRef },
+      { error: nextErrors.role, ref: roleSelectRef },
+      { error: nextErrors.status, ref: statusSelectRef },
+    ])
   }
   return Object.keys(nextErrors).length === 0
 }

@@ -177,6 +177,7 @@ import { useAuthStore } from '@/stores/auth'
 import { onMounted, onUnmounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthErrorHandler } from '@/composables/useAuthErrorHandler'
+import { focusFirstErrorField } from '@/utils/focus'
 
 const boxStyle = `flex flex-col gap-1`
 const labelStyle = `text-sm font-medium text-text-secondary`
@@ -254,20 +255,14 @@ const formValidation = () => {
 
   fieldErrors.value = nextErrors
   if (Object.keys(nextErrors).length > 0) {
-    focusFirstErrorField(nextErrors)
+    focusFirstErrorField([
+      { error: nextErrors.name, ref: nameInputRef },
+      { error: nextErrors.category, ref: categoryInputRef },
+      { error: nextErrors.price, ref: priceInputRef },
+      { error: nextErrors.stock, ref: stockInputRef },
+    ])
   }
   return Object.keys(nextErrors).length === 0
-}
-
-const focusFirstErrorField = (errors: ProductsFormErrors) => {
-  const errorFields = [
-    { error: errors.name, ref: nameInputRef },
-    { error: errors.category, ref: categoryInputRef },
-    { error: errors.price, ref: priceInputRef },
-    { error: errors.stock, ref: stockInputRef },
-  ]
-
-  errorFields.find((field) => field.error)?.ref.value?.focus()
 }
 
 const getProductDetail = async () => {
