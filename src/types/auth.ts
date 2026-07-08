@@ -28,3 +28,10 @@ export type LoginResponse = {
 export type MeResponse = {
   data: AuthUser
 }
+
+export type RefreshResponse = {
+  data: {
+    accessToken: string
+    user: AuthUser
+  }
+}
