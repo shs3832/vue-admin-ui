@@ -108,17 +108,31 @@
               type="file"
               accept="image/jpeg,image/png,image/webp"
               @change="handleGetFile"
-              class="sr-only"
+              class="sr-only peer"
+              :aria-invalid="Boolean(uploadErrorMessage)"
+              :aria-describedby="
+                uploadErrorMessage ? 'product-image-help product-image-error' : 'product-image-help'
+              "
             />
-            <label for="product-image" :class="uploadButtonStyle"> 이미지 선택 </label>
+            <label
+              for="product-image"
+              :class="[
+                uploadButtonStyle,
+                'peer-focus-visible:ring-2 peer-focus-visible:ring-primary',
+              ]"
+            >
+              이미지 선택
+            </label>
             <p v-if="selectedFileName" class="text-sm text-text-muted">
               파일명 : {{ selectedFileName }}
             </p>
           </div>
         </div>
 
-        <p class="text-sm text-text-muted">JPG, PNG, WEBP / 최대 5MB</p>
-        <p :class="errorStyle" v-if="uploadErrorMessage">{{ uploadErrorMessage }}</p>
+        <p class="text-sm text-text-muted" id="product-image-help">JPG, PNG, WEBP / 최대 5MB</p>
+        <p :class="errorStyle" v-if="uploadErrorMessage" id="product-image-error">
+          {{ uploadErrorMessage }}
+        </p>
       </div>
       <div :class="boxStyle">
         <label for="description" :class="labelStyle">설명</label>
