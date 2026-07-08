@@ -2,6 +2,17 @@
 import PageHeader from './PageHeader.vue'
 import SideBar from './SideBar.vue'
 import TopBar from './TopBar.vue'
+
+import { computed } from 'vue'
+import { useRoute } from 'vue-router'
+
+const route = useRoute()
+const pageTitle = computed(() => {
+  return route.meta.title
+})
+const pageDescription = computed(() => {
+  return route.meta.description
+})
 </script>
 <template>
   <div class="min-h-screen bg-bg-page text-text-primary">
@@ -13,11 +24,10 @@ import TopBar from './TopBar.vue'
       </aside>
 
       <main class="min-w-0 flex-1 p-6">
-        <!-- <PageHeader :title="`test`" :description="`description`" /> -->
+        <PageHeader v-if="pageTitle" :title="pageTitle" :description="pageDescription" />
 
         <RouterView />
       </main>
     </div>
   </div>
 </template>
-<style scoped></style>

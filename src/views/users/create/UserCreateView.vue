@@ -1,7 +1,5 @@
 <template>
   <div>
-    <h2>사용자 생성</h2>
-    <p>신규 관리자 계정을 생성합니다.</p>
     <form class="space-y-4 py-4" @submit.prevent="handleSubmit">
       <div :class="boxStyle">
         <label for="" :class="labelStyle">이름 <small class="text-red-500">*</small></label>

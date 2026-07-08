@@ -1,7 +1,5 @@
 <template>
   <div>
-    <h2>사용자 수정</h2>
-    <p>관리자 계정을 수정합니다.</p>
     <LoadingState v-if="isLoading" message="사용자 정보를 불러오는 중입니다." />
     <ErrorState v-else-if="errorMessage" :message="errorMessage" @retry="getUserInfo" />
     <form v-else class="space-y-4 py-4" @submit.prevent="handleEditSubmit">

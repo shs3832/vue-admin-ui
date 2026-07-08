@@ -1,6 +1,5 @@
 <template>
   <div>
-    <h2>DashBoard</h2>
     <LoadingState v-if="isLoading" message="대시보드 정보를 불러오는 중입니다." />
     <ErrorState v-else-if="errorMessage" :message="errorMessage" @retry="loadDashboardSummary" />
     <div v-else-if="summary" class="grid gap-4 md:grid-cols-2 xl:grid-cols-4 w-full">

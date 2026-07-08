@@ -7,10 +7,6 @@
       @retry="getProductDetail"
     />
     <div v-else class="space-y-6">
-      <div>
-        <h2 class="text-2xl font-bold text-text-primary">상품 수정</h2>
-        <p class="mt-1 text-sm text-text-secondary">운영 상품 정보를 수정합니다.</p>
-      </div>
       <form class="space-y-5" @submit.prevent="handleSubmit">
         <div :class="boxStyle">
           <label for="name" :class="labelStyle"

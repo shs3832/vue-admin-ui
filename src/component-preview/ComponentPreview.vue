@@ -1,12 +1,5 @@
 <template>
   <div class="space-y-8">
-    <header>
-      <h2 class="text-2xl font-bold text-text-primary">Component Preview</h2>
-      <p class="mt-1 text-sm text-text-secondary">
-        공통 UI 컴포넌트의 상태와 사용 규칙을 확인합니다.
-      </p>
-    </header>
-
     <section class="space-y-4">
       <div>
         <h3 class="text-lg font-semibold text-text-primary">Async States</h3>

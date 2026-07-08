@@ -1,17 +1,7 @@
 <template>
   <div>
-    <div class="mb-6 flex items-center justify-between gap-4">
-      <div>
-        <h2 class="text-2xl font-bold text-text-primary">상품목록</h2>
-        <p class="mt-1 text-sm text-text-secondary">상품 정보를 조회하고 관리합니다.</p>
-      </div>
-
-      <button
-        v-if="canCreateProduct"
-        type="button"
-        :class="buttonPrimaryStyle"
-        @click="handleCreateProduct"
-      >
+    <div v-if="canCreateProduct" class="mb-6 flex items-center justify-end gap-4">
+      <button type="button" :class="buttonPrimaryStyle" @click="handleCreateProduct">
         상품생성
       </button>
     </div>
