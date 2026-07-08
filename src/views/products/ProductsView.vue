@@ -6,7 +6,12 @@
         <p class="mt-1 text-sm text-text-secondary">상품 정보를 조회하고 관리합니다.</p>
       </div>
 
-      <button type="button" :class="buttonPrimaryStyle" @click="handleCreateProduct">
+      <button
+        v-if="canCreateProduct"
+        type="button"
+        :class="buttonPrimaryStyle"
+        @click="handleCreateProduct"
+      >
         상품생성
       </button>
     </div>
@@ -18,7 +23,12 @@
       title="표시할 상품이 없습니다."
       description="상품을 생성하면 이 목록에 표시됩니다."
     >
-      <button type="button" :class="buttonPrimaryStyle" @click="handleCreateProduct">
+      <button
+        v-if="canCreateProduct"
+        type="button"
+        :class="buttonPrimaryStyle"
+        @click="handleCreateProduct"
+      >
         상품 생성
       </button>
     </EmptyState>
@@ -63,7 +73,11 @@
               <ProductStatusBadge :status="product.status" />
             </td>
             <td :class="tdStyle">
-              <button :class="buttonDefaultStyle" @click="handleProductEdit(product.id)">
+              <button
+                v-if="canUpdateProduct"
+                :class="buttonDefaultStyle"
+                @click="handleProductEdit(product.id)"
+              >
                 수정
               </button>
               <!-- <button type="button" :class="[buttonDangerStyle, 'ml-2']">삭제</button> -->
@@ -83,7 +97,7 @@ import ProductStatusBadge from '@/components/products/ProductStatusBadge.vue'
 import { isApiError, type PaginationMeta } from '@/types/api'
 import type { IProduct, ProductsQuery } from '@/types/products'
 import { useAuthStore } from '@/stores/auth'
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { formatCurrency } from '@/utils/currency'
 import { useListStatus } from '@/composables/useListStatus'
@@ -109,6 +123,17 @@ const currentPage = ref(1)
 const limit = ref(10)
 
 const { isEmpty, isInitialLoading, isTableLoading } = useListStatus(products, isLoading)
+
+const productPermissions = computed(() => {
+  return authStore.user?.permissions.products
+})
+
+const canCreateProduct = computed(() => {
+  return Boolean(productPermissions.value?.create)
+})
+const canUpdateProduct = computed(() => {
+  return Boolean(productPermissions.value?.update)
+})
 
 const fetchProducts = async () => {
   isLoading.value = true

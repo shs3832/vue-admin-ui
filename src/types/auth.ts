@@ -2,7 +2,34 @@ export type AuthRole = 'admin' | 'manager' | 'editor'
 
 export type AuthStatus = 'active' | 'inactive' | 'pending'
 
-export type AuthPermissions = Record<string, boolean>
+export type AuthPermissions = {
+  dashboard: {
+    read: boolean
+  }
+  users: {
+    read: boolean
+    create: boolean
+    update: boolean
+    delete: boolean
+    updateStatus: boolean
+    bulkUpdateStatus: boolean
+  }
+  products: {
+    read: boolean
+    create: boolean
+    update: boolean
+    delete: boolean
+    updateStatus: boolean
+    bulkUpdateStatus: boolean
+  }
+  notifications: {
+    read: boolean
+    readAll: boolean
+  }
+  activityLogs: {
+    read: boolean
+  }
+}
 
 export type AuthUser = {
   id: number

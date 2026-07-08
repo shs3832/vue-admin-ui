@@ -7,7 +7,7 @@
       @search="handleSearch"
       @reset="handleResetSearch"
       @createUser="handleCreateUser"
-      :canManageUsers="canManageUsers"
+      :canCreateUser="canCreateUser"
     />
 
     <LoadingState v-if="isInitialLoading" message="목록을 불러오는 중입니다." />
@@ -39,22 +39,20 @@
               {{ item.lastLoginAt ? formatDateTime(item.lastLoginAt) : '-' }}
             </td>
             <td :class="tdStyle">
-              <button
-                v-if="canManageUsers"
-                :class="buttonDefaultStyle"
-                @click="handleEdit(item.id)"
-              >
+              <button v-if="canUpdateUser" :class="buttonDefaultStyle" @click="handleEdit(item.id)">
                 수정
               </button>
               <button
-                v-if="canManageUsers"
+                v-if="canDeleteUser"
                 type="button"
                 :class="[buttonDangerStyle, 'ml-2']"
                 @click="handleOpenDeleteDialog(item)"
               >
                 삭제
               </button>
-              <span class="text-sm text-text-secondary" v-else>권한없음</span>
+              <span v-if="!canUpdateUser && !canDeleteUser" class="text-sm text-text-secondary">
+                권한없음
+              </span>
             </td>
           </tr>
         </tbody>
@@ -119,7 +117,20 @@ const { hasItems: hasUsers, isInitialLoading, isTableLoading } = useListStatus(u
 const isDeleteDialogOpen = computed(() => {
   return selectUserForDelete.value !== null
 })
-const canManageUsers = computed(() => authStore.user?.role === 'admin')
+
+const userPermissions = computed(() => {
+  return authStore.user?.permissions.users
+})
+
+const canCreateUser = computed(() => {
+  return Boolean(userPermissions.value?.create)
+})
+const canUpdateUser = computed(() => {
+  return Boolean(userPermissions.value?.update)
+})
+const canDeleteUser = computed(() => {
+  return Boolean(userPermissions.value?.delete)
+})
 
 const loadUsersList = async () => {
   isLoading.value = true
