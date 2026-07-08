@@ -6,6 +6,8 @@
 
 현재는 로그인, 대시보드, 사용자 관리, 상품 관리, 알림, 활동 로그까지 실제 API와 연결된 관리자 UI 흐름을 구현했습니다.
 
+심화 과정에서는 API client, refresh token, permissions 기반 UI, route meta layout, form/dialog 접근성 흐름까지 확장하며 운영 UI에서 반복되는 구조를 정리하고 있습니다.
+
 ## Tech Stack
 
 - Vue 3.5.x
@@ -36,7 +38,9 @@ VITE_APP_API_URL=http://localhost:5002
 - access token 기반 인증 상태 관리
 - Pinia auth store
 - 새로고침 후 `/api/auth/me`를 통한 인증 상태 확인
+- refresh token cookie 기반 재인증 흐름
 - 로그인/보호 페이지 route guard
+- 401 인증 만료 처리 공통화
 - 로그아웃 처리
 
 ### Dashboard
@@ -55,7 +59,7 @@ VITE_APP_API_URL=http://localhost:5002
 - 사용자 생성 form
 - 사용자 수정 form
 - 사용자 삭제 confirm dialog
-- admin role 기반 관리 버튼 노출
+- permissions 기반 생성/수정/삭제 버튼 노출
 
 ### Products
 
@@ -93,6 +97,50 @@ VITE_APP_API_URL=http://localhost:5002
 - 운영 화면과 분리된 내부 UI 확인 페이지
 
 ## Implementation Notes
+
+### API Client and Error Flow
+
+API 요청은 `src/api/client.ts`의 공통 client를 통해 처리합니다.
+
+- API base URL과 Authorization header 구성
+- JSON body와 `FormData` body 분기
+- `204 No Content` 응답 처리
+- 실패 응답을 `ApiError`로 정규화
+- 서버 `fieldErrors`를 form field error로 연결
+- refresh/logout 요청을 위한 `credentials` 옵션 지원
+
+이 구조를 통해 view에서는 `response.ok`, `response.json()` 분기를 반복하지 않고 성공 데이터와 에러 표현에 집중할 수 있게 했습니다.
+
+### Auth and Permissions
+
+로그인, `/auth/me`, `/auth/refresh` 응답의 user 정보는 `src/types/auth.ts`의 `AuthUser` 타입으로 관리합니다.
+
+백엔드에서 내려주는 `permissions` 객체를 기준으로 users/products 주요 액션 버튼을 노출합니다.
+
+- `users.create/update/delete`
+- `products.create/update`
+
+프론트의 permissions 처리는 UX를 위한 1차 제어이며, 실제 권한 검증은 백엔드의 403 응답이 담당합니다.
+
+### Route Meta Layout
+
+각 route의 `meta.title`, `meta.description`을 기반으로 `AppShell`에서 공통 `PageHeader`를 렌더링합니다.
+
+Vue Router의 `RouteMeta` 타입은 `src/types/router.d.ts`에서 확장했고, `document.title`도 route meta 기반으로 갱신합니다.
+
+### Accessibility Flow
+
+폼과 다이얼로그의 키보드/스크린리더 흐름을 보강했습니다.
+
+- form label과 input id 연결
+- `aria-invalid`, `aria-describedby` 적용
+- validation 실패 시 첫 번째 에러 field로 focus 이동
+- `src/utils/focus.ts`의 `focusFirstErrorField()`로 focus 로직 분리
+- `ConfirmDialog`에 `role="dialog"`, `aria-modal`, `aria-labelledby`, `aria-describedby` 적용
+- `useId()`로 dialog title/description id 충돌 방지
+- dialog open 시 취소 버튼으로 focus 이동
+- `Escape`로 닫기
+- 취소/ESC 닫기 시 dialog를 열었던 삭제 버튼으로 focus 복귀
 
 ### File Upload Flow
 
@@ -151,6 +199,7 @@ src/
   api/
     activityLogs.ts
     auth.ts
+    client.ts
     dashboard.ts
     notifications.ts
     products.ts
@@ -173,13 +222,16 @@ src/
   types/
     activityLogs.ts
     api.ts
+    auth.ts
     dashboard.ts
     notifications.ts
     products.ts
+    router.d.ts
     users.ts
   utils/
     currency.ts
     date.ts
+    focus.ts
   views/
     activity-logs/
     notifications/
@@ -219,8 +271,12 @@ npm run build
 
 - 실제 API 연동 기반 관리자 UI 구현
 - 사용자/상품 CRUD 흐름 구현
+- API client 기반 요청/응답/에러 처리 공통화
+- refresh token 기반 인증 복원 흐름
 - 이미지 업로드 UX 개선
-- 권한에 따른 UI 노출
+- permissions 기반 UI 노출
+- route meta 기반 PageHeader/layout 정리
+- form/dialog 접근성 focus flow 개선
 - loading/empty/error 상태 처리
 - API/type/formatting/list state 책임 분리
 - 공통 LoadingState/ErrorState/EmptyState UI 패턴 정리
@@ -230,10 +286,10 @@ npm run build
 
 ## Remaining Improvements
 
-- API fetch wrapper 또는 Axios instance 도입
-- access token 만료/refresh token 흐름 반영
-- PageHeader route meta 기반 공통화
-- SideBar active 메뉴 처리
-- Users/Products form 공통화
+- Users/Products input, select, outline button, table row 시각 대비 개선
+- 반복 스타일이 충분히 쌓인 뒤 BaseButton/BaseInput/FormField 공통화 검토
 - 숫자 페이지네이션/limit 변경/URL query sync 도입 시 pagination composable 검토
+- Users/Products meta API 활용
+- status 변경/bulk action 검토
+- 핵심 유틸/composable/API error handling 테스트 추가
 - README 최종 스크린샷/시연 이미지 추가
