@@ -200,25 +200,14 @@ const formValidate = () => {
 }
 
 const focusFirstErrorField = (errors: CreateUserFormErrors) => {
-  if (errors.name) {
-    nameInputRef.value?.focus()
-    return
-  }
-  if (errors.email) {
-    emailInputRef.value?.focus()
-    return
-  }
-  if (errors.password) {
-    passwordInputRef.value?.focus()
-    return
-  }
-  if (errors.role) {
-    roleSelectRef.value?.focus()
-    return
-  }
-  if (errors.status) {
-    statusSelectRef.value?.focus()
-  }
+  const errorFields = [
+    { error: errors.name, ref: nameInputRef },
+    { error: errors.email, ref: emailInputRef },
+    { error: errors.password, ref: passwordInputRef },
+    { error: errors.role, ref: roleSelectRef },
+    { error: errors.status, ref: statusSelectRef },
+  ]
+  errorFields.find((field) => field.error)?.ref.value?.focus()
 }
 
 const handleSubmit = async () => {
