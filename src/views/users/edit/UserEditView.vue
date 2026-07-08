@@ -121,7 +121,7 @@
         </button>
       </div>
     </form>
-    <p v-if="submitErrorMessage">{{ submitErrorMessage }}</p>
+    <p v-if="submitErrorMessage" :class="errorStyle" role="alert">{{ submitErrorMessage }}</p>
   </div>
 </template>
 

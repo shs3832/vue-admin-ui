@@ -86,7 +86,6 @@
           <option value="hidden">숨김</option>
           <option value="soldout">품절</option>
         </select>
-        <p :class="errorStyle"></p>
       </div>
       <div :class="boxStyle">
         <label :class="labelStyle">상품 이미지</label>
@@ -146,7 +145,6 @@
           placeholder="설명 입력"
           v-model="form.description"
         ></textarea>
-        <p :class="errorStyle"></p>
       </div>
 
       <div>
@@ -154,7 +152,7 @@
           <button type="submit" :class="buttonPrimaryStyle" :disabled="isLoading">등록</button>
           <button type="button" :class="buttonDefaultStyle" :disabled="isLoading">취소</button>
         </div>
-        <p v-if="createErrorMessage">{{ createErrorMessage }}</p>
+        <p v-if="createErrorMessage" :class="errorStyle" role="alert">{{ createErrorMessage }}</p>
       </div>
     </form>
   </div>

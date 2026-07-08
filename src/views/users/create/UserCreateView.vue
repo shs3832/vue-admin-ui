@@ -120,7 +120,7 @@
           취소
         </button>
       </div>
-      <p v-if="errorMessage">{{ errorMessage }}</p>
+      <p v-if="errorMessage" :class="errorStyle" role="alert">{{ errorMessage }}</p>
     </form>
   </div>
 </template>
