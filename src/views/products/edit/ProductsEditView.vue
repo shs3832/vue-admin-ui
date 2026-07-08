@@ -21,6 +21,7 @@
             v-model="form.name"
             :aria-invalid="Boolean(fieldErrors.name)"
             :aria-describedby="fieldErrors.name ? 'name-error' : undefined"
+            ref="nameInputRef"
           />
           <p :class="errorStyle" v-if="fieldErrors.name" id="name-error">
             {{ fieldErrors.name }}
@@ -39,6 +40,7 @@
             v-model="form.category"
             :aria-invalid="Boolean(fieldErrors.category)"
             :aria-describedby="fieldErrors.category ? 'category-error' : undefined"
+            ref="categoryInputRef"
           />
           <p :class="errorStyle" v-if="fieldErrors.category" id="category-error">
             {{ fieldErrors.category }}
@@ -57,6 +59,7 @@
             v-model.number="form.price"
             :aria-invalid="Boolean(fieldErrors.price)"
             :aria-describedby="fieldErrors.price ? 'price-error' : undefined"
+            ref="priceInputRef"
           />
           <p :class="errorStyle" v-if="fieldErrors.price" id="price-error">
             {{ fieldErrors.price }}
@@ -75,6 +78,7 @@
             v-model.number="form.stock"
             :aria-invalid="Boolean(fieldErrors.stock)"
             :aria-describedby="fieldErrors.stock ? 'stock-error' : undefined"
+            ref="stockInputRef"
           />
           <p :class="errorStyle" v-if="fieldErrors.stock" id="stock-error">
             {{ fieldErrors.stock }}
@@ -187,6 +191,12 @@ const buttonDefaultStyle = `rounded-md border border-border-strong px-4 py-2 tex
 const uploadButtonStyle = `inline-flex w-fit cursor-pointer items-center justify-center rounded-md border border-border-strong bg-bg-surface px-4 py-2 text-sm font-medium text-text-secondary hover:bg-bg-muted`
 
 const { handleAuthError } = useAuthErrorHandler()
+
+const nameInputRef = ref<HTMLInputElement | null>(null)
+const categoryInputRef = ref<HTMLInputElement | null>(null)
+const priceInputRef = ref<HTMLInputElement | null>(null)
+const stockInputRef = ref<HTMLInputElement | null>(null)
+
 const route = useRoute()
 const router = useRouter()
 const authStore = useAuthStore()
@@ -245,8 +255,21 @@ const formValidation = () => {
   }
 
   fieldErrors.value = nextErrors
-
+  if (Object.keys(nextErrors).length > 0) {
+    focusFirstErrorField(nextErrors)
+  }
   return Object.keys(nextErrors).length === 0
+}
+
+const focusFirstErrorField = (errors: ProductsFormErrors) => {
+  const errorFields = [
+    { error: errors.name, ref: nameInputRef },
+    { error: errors.category, ref: categoryInputRef },
+    { error: errors.price, ref: priceInputRef },
+    { error: errors.stock, ref: stockInputRef },
+  ]
+
+  errorFields.find((field) => field.error)?.ref.value?.focus()
 }
 
 const getProductDetail = async () => {
