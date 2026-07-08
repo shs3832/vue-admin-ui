@@ -30,6 +30,7 @@ const router = createRouter({
           meta: {
             title: '대시보드',
             description: '주문, 상품, 매출 현황을 요약해 확인합니다.',
+            activeMenu: 'dashboard',
           },
         },
         {
@@ -39,6 +40,7 @@ const router = createRouter({
           meta: {
             title: '사용자 관리',
             description: '관리자 계정과 사용자 상태를 조회하고 관리합니다.',
+            activeMenu: 'users',
           },
         },
         {
@@ -48,6 +50,7 @@ const router = createRouter({
           meta: {
             title: '사용자 생성',
             description: '신규 관리자 계정을 생성합니다.',
+            activeMenu: 'users',
           },
         },
         {
@@ -57,6 +60,7 @@ const router = createRouter({
           meta: {
             title: '사용자 수정',
             description: '관리자 계정 정보를 수정합니다.',
+            activeMenu: 'users',
           },
         },
         {
@@ -66,6 +70,7 @@ const router = createRouter({
           meta: {
             title: '상품 관리',
             description: '상품 목록과 판매 상태를 조회하고 관리합니다.',
+            activeMenu: 'products',
           },
         },
         {
@@ -75,6 +80,7 @@ const router = createRouter({
           meta: {
             title: '상품 생성',
             description: '운영 상품 정보를 등록합니다.',
+            activeMenu: 'products',
           },
         },
         {
@@ -84,6 +90,7 @@ const router = createRouter({
           meta: {
             title: '상품 수정',
             description: '운영 상품 정보를 수정합니다.',
+            activeMenu: 'products',
           },
         },
         {
@@ -93,6 +100,7 @@ const router = createRouter({
           meta: {
             title: '알림 관리',
             description: '운영 알림 목록과 읽음 상태를 확인합니다.',
+            activeMenu: 'notifications',
           },
         },
         {
@@ -102,6 +110,7 @@ const router = createRouter({
           meta: {
             title: '활동 로그',
             description: '관리자 작업 이력과 주요 변경 내역을 확인합니다.',
+            activeMenu: 'activityLogs',
           },
         },
         {
@@ -111,6 +120,7 @@ const router = createRouter({
           meta: {
             title: '컴포넌트 미리보기',
             description: '공통 UI 컴포넌트의 상태와 스타일을 확인합니다.',
+            activeMenu: 'componentPreview',
           },
         },
       ],
