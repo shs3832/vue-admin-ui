@@ -28,6 +28,7 @@
           v-model="form.email"
           :aria-invalid="Boolean(fieldErrors.email)"
           :aria-describedby="fieldErrors.email ? 'email-error' : undefined"
+          ref="emailInputRef"
         />
         <p v-if="fieldErrors.email" :class="errorStyle" id="email-error">
           {{ fieldErrors.email }}
@@ -46,6 +47,7 @@
           v-model="form.password"
           :aria-invalid="Boolean(fieldErrors.password)"
           :aria-describedby="fieldErrors.password ? 'password-error' : undefined"
+          ref="passwordInputRef"
         />
         <p v-if="fieldErrors.password" :class="errorStyle" id="password-error">
           {{ fieldErrors.password }}
@@ -61,6 +63,7 @@
           v-model="form.role"
           :aria-invalid="Boolean(fieldErrors.role)"
           :aria-describedby="fieldErrors.role ? 'role-error' : undefined"
+          ref="roleSelectRef"
         >
           <option value="">역할 선택</option>
           <option value="admin">관리자</option>
@@ -81,6 +84,7 @@
           v-model="form.status"
           :aria-invalid="Boolean(fieldErrors.status)"
           :aria-describedby="fieldErrors.status ? 'status-error' : undefined"
+          ref="statusSelectRef"
         >
           <option value="">상태 선택</option>
           <option value="active">활성</option>
@@ -139,6 +143,11 @@ const buttonPrimaryStyle = `rounded-md bg-primary px-4 py-2 text-sm font-medium 
 const buttonDefaultStyle = `rounded-md border border-border-strong px-4 py-2 text-sm cursor-pointer disabled:cursor-not-allowed disabled:opacity-50`
 
 const nameInputRef = ref<HTMLInputElement | null>(null)
+const emailInputRef = ref<HTMLInputElement | null>(null)
+const passwordInputRef = ref<HTMLInputElement | null>(null)
+const roleSelectRef = ref<HTMLSelectElement | null>(null)
+const statusSelectRef = ref<HTMLSelectElement | null>(null)
+
 const isSubmitting = ref(false)
 const errorMessage = ref('')
 const router = useRouter()
@@ -183,9 +192,35 @@ const formValidate = () => {
   }
 
   fieldErrors.value = nextErrors
+  if (Object.keys(nextErrors).length > 0) {
+    focusFirstErrorField(nextErrors)
+  }
 
   return Object.keys(nextErrors).length === 0
 }
+
+const focusFirstErrorField = (errors: CreateUserFormErrors) => {
+  if (errors.name) {
+    nameInputRef.value?.focus()
+    return
+  }
+  if (errors.email) {
+    emailInputRef.value?.focus()
+    return
+  }
+  if (errors.password) {
+    passwordInputRef.value?.focus()
+    return
+  }
+  if (errors.role) {
+    roleSelectRef.value?.focus()
+    return
+  }
+  if (errors.status) {
+    statusSelectRef.value?.focus()
+  }
+}
+
 const handleSubmit = async () => {
   isSubmitting.value = true
   errorMessage.value = ''
