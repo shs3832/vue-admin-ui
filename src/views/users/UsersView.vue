@@ -46,7 +46,7 @@
                 v-if="canDeleteUser"
                 type="button"
                 :class="[buttonDangerStyle, 'ml-2']"
-                @click="handleOpenDeleteDialog(item)"
+                @click="handleOpenDeleteDialog(item, $event)"
               >
                 삭제
               </button>
@@ -111,6 +111,7 @@ const searchStatus = ref<IUser['status'] | ''>('')
 const currentPage = ref(1)
 const limit = ref(10)
 const pagination = ref<PaginationMeta | null>(null)
+const lastDeleteButtonRef = ref<HTMLButtonElement | null>(null)
 const { handleAuthError } = useAuthErrorHandler()
 
 const { hasItems: hasUsers, isInitialLoading, isTableLoading } = useListStatus(users, isLoading)
@@ -203,12 +204,14 @@ const handleConfirmDelete = async () => {
   }
 }
 
-const handleOpenDeleteDialog = (user: IUser) => {
+const handleOpenDeleteDialog = (user: IUser, event: MouseEvent) => {
+  lastDeleteButtonRef.value = event.currentTarget as HTMLButtonElement
   selectUserForDelete.value = user
 }
 
 const handleCloseModal = () => {
   selectUserForDelete.value = null
+  lastDeleteButtonRef.value?.focus()
 }
 
 onMounted(() => {
