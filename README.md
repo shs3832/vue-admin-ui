@@ -6,7 +6,7 @@
 
 현재는 로그인, 대시보드, 사용자 관리, 상품 관리, 알림, 활동 로그까지 실제 API와 연결된 관리자 UI 흐름을 구현했습니다.
 
-심화 과정에서는 API client, refresh token, permissions 기반 UI, route meta layout, form/dialog 접근성 흐름까지 확장하며 운영 UI에서 반복되는 구조를 정리하고 있습니다.
+심화 과정에서는 API client, refresh token, permissions 기반 UI, route meta layout, form/dialog 접근성, URL query 기반 목록 상태 복원, meta API 기반 필터 옵션까지 확장하며 운영 UI에서 반복되는 구조를 정리하고 있습니다.
 
 ## Tech Stack
 
@@ -54,6 +54,9 @@ VITE_APP_API_URL=http://localhost:5002
 - 사용자 목록 조회
 - role/status badge
 - 검색, role/status filter
+- sort
+- URL query 기반 검색/필터/정렬/페이지 상태 복원
+- meta API 기반 role/status count 표시
 - pagination
 - empty/loading/error 상태 처리
 - 사용자 생성 form
@@ -66,6 +69,10 @@ VITE_APP_API_URL=http://localhost:5002
 - 상품 목록 조회
 - 상품 상태 badge
 - 가격/재고/이미지 표시
+- category/status filter
+- sort
+- URL query 기반 필터/정렬/페이지 상태 복원
+- meta API 기반 category/status filter option 표시
 - 상품 생성 form
 - 상품 수정 form
 - 이미지 업로드 API 연동
@@ -142,6 +149,29 @@ Vue Router의 `RouteMeta` 타입은 `src/types/router.d.ts`에서 확장했고, 
 - `Escape`로 닫기
 - 취소/ESC 닫기 시 dialog를 열었던 삭제 버튼으로 focus 복귀
 
+### List Query Flow
+
+Users와 Products 목록은 검색, 필터, 정렬, 페이지 상태를 URL query와 동기화합니다.
+
+- 새로고침 후에도 같은 목록 조건 복원
+- URL 공유 시 같은 검색 결과 확인
+- 뒤로가기/앞으로가기 흐름 유지
+- 사용자가 새 검색/필터/정렬을 수행하면 page를 1로 초기화
+- `limit=10`은 백엔드/API 정책으로 보고 URL에는 노출하지 않음
+
+query 값은 화면에서 허용하는 값인지 검증한 뒤 상태에 반영합니다. 예를 들어 role/status/sort는 allow-list로 확인하고, page는 양의 정수만 허용합니다.
+
+페이지네이션 UI는 `src/components/ui/PaginationBar.vue`로 공통화했고, 많은 페이지가 있을 때도 숫자 버튼은 최대 5개만 표시합니다.
+
+### Meta API Filter Options
+
+Users와 Products 필터 옵션은 백엔드 meta API 응답을 사용합니다.
+
+- Users: role/status option과 count
+- Products: category option, status option과 count
+
+이를 통해 프론트에 고정된 필터 목록만 두지 않고, 백엔드 데이터 상태에 맞춰 운영자가 선택할 수 있는 조건을 표시합니다.
+
 ### File Upload Flow
 
 초기 구현에서는 파일 선택 시점에 바로 업로드했지만, 이미지 변경이나 등록 취소 시 불필요한 업로드가 발생할 수 있었습니다.
@@ -189,8 +219,10 @@ Homework 13에서는 기능이 늘어나며 흩어지기 쉬운 API, type, forma
 - TypeScript 타입 정의는 `src/types`로 이동
 - 날짜/금액 formatting은 `src/utils`에서 관리
 - 반복되는 list loading/empty 상태 계산은 `src/composables/useListStatus.ts`로 분리
+- route query parsing은 `src/utils/query.ts`에서 관리
+- pagination UI는 `src/components/ui/PaginationBar.vue`로 공통화
 
-Pagination 상태는 반복 후보로 확인했지만, 아직 숫자 페이지네이션/limit 변경/URL query sync가 없으므로 view 안에 유지했습니다.
+Pagination 계산과 URL query 동기화는 Users/Products에서 반복되기 시작했기 때문에 공통 UI와 query helper로 분리했습니다. 다만 도메인별 필터/정렬 allow-list는 각 View에 남겨 화면별 정책을 명확히 유지했습니다.
 
 ## Project Structure
 
@@ -277,19 +309,22 @@ npm run build
 - permissions 기반 UI 노출
 - route meta 기반 PageHeader/layout 정리
 - form/dialog 접근성 focus flow 개선
+- URL query 기반 목록 상태 복원
+- sort/pagination/meta API 기반 필터 옵션
 - loading/empty/error 상태 처리
 - API/type/formatting/list state 책임 분리
 - 공통 LoadingState/ErrorState/EmptyState UI 패턴 정리
 - Component Preview를 통한 공통 UI 상태와 badge variant 문서화
 - 백엔드 응답 구조 기반 TypeScript 타입 정의
 - 읽기 전용 운영 로그/알림 화면 구현
+- 단순 CRUD를 넘어 운영자가 조건을 공유하고 복원할 수 있는 목록 UI 구현
 
 ## Remaining Improvements
 
 - Users/Products input, select, outline button, table row 시각 대비 개선
 - 반복 스타일이 충분히 쌓인 뒤 BaseButton/BaseInput/FormField 공통화 검토
-- 숫자 페이지네이션/limit 변경/URL query sync 도입 시 pagination composable 검토
-- Users/Products meta API 활용
 - status 변경/bulk action 검토
 - 핵심 유틸/composable/API error handling 테스트 추가
+- Component Preview 확장
+- React/Next 재구현 설계
 - README 최종 스크린샷/시연 이미지 추가
