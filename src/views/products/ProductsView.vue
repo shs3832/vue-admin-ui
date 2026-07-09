@@ -87,8 +87,8 @@ import ProductStatusBadge from '@/components/products/ProductStatusBadge.vue'
 import { isApiError, type PaginationMeta } from '@/types/api'
 import type { IProduct, ProductsQuery } from '@/types/products'
 import { useAuthStore } from '@/stores/auth'
-import { computed, onMounted, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { computed, ref, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { formatCurrency } from '@/utils/currency'
 import { useListStatus } from '@/composables/useListStatus'
 import LoadingState from '@/components/ui/LoadingState.vue'
@@ -102,14 +102,28 @@ const buttonPrimaryStyle = `rounded-md bg-primary px-4 py-2 text-sm font-medium 
 const buttonDefaultStyle = `rounded-md border border-border-strong px-2 py-1 text-sm cursor-pointer disabled:cursor-not-allowed disabled:opacity-50`
 
 const { handleAuthError } = useAuthErrorHandler()
+const route = useRoute()
 const router = useRouter()
+
+const getQueryString = (value: unknown) => {
+  return typeof value === 'string' ? value : ''
+}
+
+const getQueryPage = (value: unknown): number => {
+  const queryValue = Number(getQueryString(value))
+
+  if (!Number.isInteger(queryValue)) return 1
+
+  return queryValue < 1 ? 1 : queryValue
+}
+
 const products = ref<IProduct[]>([])
 const pagination = ref<PaginationMeta | null>(null)
 const isLoading = ref(false)
 
 const errorMessage = ref('')
 const authStore = useAuthStore()
-const currentPage = ref(1)
+const currentPage = ref(getQueryPage(route.query.page))
 const limit = ref(10)
 
 const { isEmpty, isInitialLoading, isTableLoading } = useListStatus(products, isLoading)
@@ -124,6 +138,19 @@ const canCreateProduct = computed(() => {
 const canUpdateProduct = computed(() => {
   return Boolean(productPermissions.value?.update)
 })
+
+const createProductsQueryParams = () => {
+  return {
+    page: currentPage.value === 1 ? undefined : String(currentPage.value),
+  }
+}
+
+const updateProductsQuery = () => {
+  router.replace({
+    name: 'products',
+    query: createProductsQueryParams(),
+  })
+}
 
 const fetchProducts = async () => {
   isLoading.value = true
@@ -151,7 +178,7 @@ const fetchProducts = async () => {
 
 const handleChangePage = (page: number) => {
   currentPage.value = page
-  fetchProducts()
+  updateProductsQuery()
 }
 
 const handleCreateProduct = () => {
@@ -162,7 +189,12 @@ const handleProductEdit = (id: number) => {
   router.push({ name: 'productEdit', params: { id: id } })
 }
 
-onMounted(() => {
-  fetchProducts()
-})
+watch(
+  () => route.query,
+  () => {
+    currentPage.value = getQueryPage(route.query.page)
+    fetchProducts()
+  },
+  { immediate: true },
+)
 </script>
