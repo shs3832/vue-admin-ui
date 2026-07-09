@@ -18,6 +18,9 @@ export const fetchUsersApi = async (accessToken: string, query: UsersQuery) => {
   if (query.status) {
     params.set('status', query.status)
   }
+  if (query.sort) {
+    params.set('sort', query.sort)
+  }
 
   params.set('page', String(query.page))
   params.set('limit', String(query.limit))

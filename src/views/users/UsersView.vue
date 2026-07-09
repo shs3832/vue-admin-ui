@@ -4,6 +4,7 @@
       v-model:searchKeyword="searchKeyword"
       v-model:searchRole="searchRole"
       v-model:searchStatus="searchStatus"
+      v-model:selectedSort="selectedSort"
       @search="handleSearch"
       @reset="handleResetSearch"
       @createUser="handleCreateUser"
@@ -77,7 +78,7 @@
 import { useAuthStore } from '@/stores/auth'
 import { computed, ref, watch } from 'vue'
 import { type PaginationMeta, isApiError } from '@/types/api'
-import type { IUser, UsersQuery } from '@/types/users'
+import type { IUser, UserSort, UsersQuery } from '@/types/users'
 
 import UserRoleBadge from '@/components/users/UserRoleBadge.vue'
 import UserStatusBadge from '@/components/users/UserStatusBadge.vue'
@@ -101,7 +102,7 @@ const buttonDangerStyle = `${buttonDefaultStyle} bg-red-500 text-white border-re
 const buttonPrimaryStyle = `rounded-md bg-primary px-4 py-2 text-sm font-medium text-white cursor-pointer hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50`
 const userRoles: IUser['role'][] = ['admin', 'manager', 'editor']
 const userStatus: IUser['status'][] = ['active', 'inactive', 'pending']
-
+const userSorts: UserSort[] = ['createdAt:asc', 'createdAt:desc', 'name:asc', 'name:desc']
 const getQueryRole = (value: unknown): IUser['role'] | '' => {
   const queryValue = getQueryString(value)
   return userRoles.includes(queryValue as IUser['role']) ? (queryValue as IUser['role']) : ''
@@ -110,6 +111,11 @@ const getQueryRole = (value: unknown): IUser['role'] | '' => {
 const getQueryStatus = (value: unknown): IUser['status'] | '' => {
   const queryValue = getQueryString(value)
   return userStatus.includes(queryValue as IUser['status']) ? (queryValue as IUser['status']) : ''
+}
+
+const getQuerySort = (value: unknown): UserSort | '' => {
+  const queryValue = getQueryString(value)
+  return userSorts.includes(queryValue as UserSort) ? (queryValue as UserSort) : ''
 }
 
 const route = useRoute()
@@ -122,6 +128,8 @@ const selectUserForDelete = ref<IUser | null>(null)
 const searchKeyword = ref(getQueryString(route.query.keyword))
 const searchRole = ref<IUser['role'] | ''>(getQueryRole(route.query.role))
 const searchStatus = ref<IUser['status'] | ''>(getQueryStatus(route.query.status))
+const selectedSort = ref<UserSort | ''>(getQuerySort(route.query.sort))
+
 const currentPage = ref(getQueryPage(route.query.page))
 const limit = ref(10)
 const pagination = ref<PaginationMeta | null>(null)
@@ -152,6 +160,7 @@ const createUsersQueryParams = () => {
     keyword: searchKeyword.value || undefined,
     role: searchRole.value || undefined,
     status: searchStatus.value || undefined,
+    sort: selectedSort.value || undefined,
     page: currentPage.value === 1 ? undefined : String(currentPage.value),
   }
 }
@@ -171,6 +180,7 @@ const loadUsersList = async () => {
     keyword: searchKeyword.value,
     role: searchRole.value,
     status: searchStatus.value,
+    sort: selectedSort.value || undefined,
     page: currentPage.value,
     limit: limit.value,
   }
@@ -205,6 +215,7 @@ const handleResetSearch = () => {
   searchRole.value = ''
   searchStatus.value = ''
   currentPage.value = 1
+  selectedSort.value = ''
   updateUsersQuery()
 }
 
@@ -251,7 +262,7 @@ watch(
     searchRole.value = getQueryRole(route.query.role)
     searchStatus.value = getQueryStatus(route.query.status)
     currentPage.value = getQueryPage(route.query.page)
-
+    selectedSort.value = getQuerySort(route.query.sort)
     loadUsersList()
   },
   { immediate: true },

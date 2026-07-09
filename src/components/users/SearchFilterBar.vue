@@ -50,6 +50,23 @@
           <option value="pending">대기</option>
         </select>
       </div>
+      <div class="flex flex-col gap-1">
+        <label for="user-search-sort" :class="labelStyle">정렬</label>
+        <select
+          id="user-search-sort"
+          :class="selectStyle"
+          @change="
+            emit('update:selectedSort', ($event.target as HTMLSelectElement).value as UserSort | '')
+          "
+          :value="selectedSort"
+        >
+          <option value="">기본</option>
+          <option value="name:asc">이름 오름차순</option>
+          <option value="name:desc">이름 내림차순</option>
+          <option value="createdAt:desc">생성일 최신순</option>
+          <option value="createdAt:asc">생성일 오래된순</option>
+        </select>
+      </div>
       <div class="flex flex-wrap gap-3">
         <button
           type="submit"
@@ -80,7 +97,7 @@
 </template>
 
 <script setup lang="ts">
-import type { IUser } from '@/types/users'
+import type { IUser, UserSort } from '@/types/users'
 
 const labelStyle = `text-sm font-medium text-text-secondary`
 const inputStyle = `rounded-md border border-border-strong px-3 py-2 text-sm`
@@ -90,11 +107,13 @@ defineProps<{
   searchRole: IUser['role'] | ''
   searchStatus: IUser['status'] | ''
   canCreateUser: boolean
+  selectedSort: UserSort | ''
 }>()
 const emit = defineEmits<{
   'update:searchKeyword': [value: string]
   'update:searchRole': [value: IUser['role'] | '']
   'update:searchStatus': [value: IUser['status'] | '']
+  'update:selectedSort': [value: UserSort | '']
   search: []
   reset: []
   createUser: []

@@ -21,6 +21,7 @@ export type UsersQuery = {
   keyword?: string
   role?: IUser['role'] | ''
   status?: IUser['status'] | ''
+  sort?: UserSort
   page: number
   limit: number
 }
@@ -49,3 +50,5 @@ export type UpdateUserFormErrors = Partial<Record<keyof UpdateUserForm, string>>
 export type IUserResponse = {
   data: IUser
 }
+
+export type UserSort = 'createdAt:asc' | 'createdAt:desc' | 'name:asc' | 'name:desc'
