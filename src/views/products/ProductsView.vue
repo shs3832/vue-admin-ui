@@ -24,6 +24,12 @@
     </EmptyState>
 
     <div v-else>
+      <div v-if="productsMeta" class="mb-4 flex flex-wrap gap-2 text-sm text-text-secondary">
+        <span v-for="status in productsMeta.statuses" :key="status.value">
+          {{ productStatusLabels[status.value] }} {{ status.count }}
+        </span>
+        <span>카테고리 {{ productsMeta.categories.length }}</span>
+      </div>
       <table class="w-full border-collapse text-sm">
         <thead>
           <tr>
@@ -81,13 +87,13 @@
 </template>
 
 <script setup lang="ts">
-import { getProducts } from '@/api/products'
+import { getProducts, getProductsMetaApi } from '@/api/products'
 import PaginationBar from '@/components/products/PaginationBar.vue'
 import ProductStatusBadge from '@/components/products/ProductStatusBadge.vue'
 import { isApiError, type PaginationMeta } from '@/types/api'
-import type { IProduct, ProductsQuery } from '@/types/products'
+import type { IProduct, ProductsMeta, ProductsQuery } from '@/types/products'
 import { useAuthStore } from '@/stores/auth'
-import { computed, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { formatCurrency } from '@/utils/currency'
 import { useListStatus } from '@/composables/useListStatus'
@@ -108,6 +114,7 @@ const router = useRouter()
 
 const products = ref<IProduct[]>([])
 const pagination = ref<PaginationMeta | null>(null)
+const productsMeta = ref<ProductsMeta | null>(null)
 const isLoading = ref(false)
 
 const errorMessage = ref('')
@@ -116,6 +123,12 @@ const currentPage = ref(getQueryPage(route.query.page))
 const limit = ref(10)
 
 const { isEmpty, isInitialLoading, isTableLoading } = useListStatus(products, isLoading)
+
+const productStatusLabels: Record<IProduct['status'], string> = {
+  selling: '판매중',
+  hidden: '숨김',
+  soldout: '품절',
+}
 
 const productPermissions = computed(() => {
   return authStore.user?.permissions.products
@@ -165,6 +178,15 @@ const fetchProducts = async () => {
   }
 }
 
+const fetchProductsMeta = async () => {
+  try {
+    const response = await getProductsMetaApi(authStore.accessToken)
+    productsMeta.value = response.data
+  } catch (error) {
+    if (handleAuthError(error)) return
+  }
+}
+
 const handleChangePage = (page: number) => {
   currentPage.value = page
   updateProductsQuery()
@@ -177,6 +199,10 @@ const handleCreateProduct = () => {
 const handleProductEdit = (id: number) => {
   router.push({ name: 'productEdit', params: { id: id } })
 }
+
+onMounted(() => {
+  fetchProductsMeta()
+})
 
 watch(
   () => route.query,

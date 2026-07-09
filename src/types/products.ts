@@ -50,4 +50,18 @@ export type UploadImageResponse = {
   }
 }
 
+export type ProductStatusMeta = {
+  value: IProduct['status']
+  count: number
+}
+
+export type ProductsMeta = {
+  statuses: ProductStatusMeta[]
+  categories: string[]
+}
+
+export type ProductsMetaResponse = {
+  data: ProductsMeta
+}
+
 export type ProductsFormErrors = Partial<Record<keyof ProductForm, string>>

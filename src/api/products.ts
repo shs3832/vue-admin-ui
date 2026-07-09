@@ -5,6 +5,7 @@ import type {
   IProductsResponse,
   ProductDetailResponse,
   UploadImageResponse,
+  ProductsMetaResponse,
 } from '@/types/products'
 import { apiClient } from './client'
 
@@ -35,6 +36,10 @@ export const createProductApi = async (accessToken: string, payload: CreateProdu
 
 export const getProductsDetailApi = async (accessToken: string, id: number) => {
   return apiClient<ProductDetailResponse>(`/products/${id}`, { accessToken })
+}
+
+export const getProductsMetaApi = async (accessToken: string) => {
+  return apiClient<ProductsMetaResponse>(`/products/meta`, { accessToken })
 }
 
 export const updateProductApi = async (
