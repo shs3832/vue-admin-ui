@@ -2,8 +2,9 @@
   <section>
     <form class="mb-4 flex flex-wrap items-end gap-3" @submit.prevent="emit('search')">
       <div class="flex flex-col gap-1">
-        <label for="" :class="labelStyle">검색어</label>
+        <label for="user-search-keyword" :class="labelStyle">검색어</label>
         <input
+          id="user-search-keyword"
           type="text"
           :class="inputStyle"
           placeholder="이름 이메일 부서 검색"
@@ -12,8 +13,9 @@
         />
       </div>
       <div class="flex flex-col gap-1">
-        <label for="" :class="labelStyle">역할</label>
+        <label for="user-search-role" :class="labelStyle">역할</label>
         <select
+          id="user-search-role"
           :class="selectStyle"
           @change="
             emit(
@@ -30,8 +32,9 @@
         </select>
       </div>
       <div class="flex flex-col gap-1">
-        <label for="" :class="labelStyle">상태</label>
+        <label for="user-search-status" :class="labelStyle">상태</label>
         <select
+          id="user-search-status"
           :class="selectStyle"
           @change="
             emit(

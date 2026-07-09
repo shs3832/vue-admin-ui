@@ -5,49 +5,13 @@
         상품생성
       </button>
     </div>
-    <form class="mb-4 flex flex-wrap items-end gap-3" @submit.prevent="handleFilterProducts">
-      <div class="flex flex-col gap-1">
-        <label for="product-category-filter" class="text-sm font-medium text-text-secondary">
-          카테고리
-        </label>
-        <select
-          id="product-category-filter"
-          v-model="selectedCategory"
-          class="rounded-md border border-border-strong px-3 py-2 text-sm"
-        >
-          <option value="">전체</option>
-          <option
-            v-for="category in productsMeta?.categories ?? []"
-            :key="category"
-            :value="category"
-          >
-            {{ category }}
-          </option>
-        </select>
-      </div>
-      <div class="flex flex-col gap-1">
-        <label for="product-status-filter" class="text-sm font-medium text-text-secondary">
-          상태
-        </label>
-        <select
-          id="product-status-filter"
-          v-model="selectedStatus"
-          class="rounded-md border border-border-strong px-3 py-2 text-sm"
-        >
-          <option value="">전체</option>
-          <option
-            v-for="status in productsMeta?.statuses ?? []"
-            :key="status.value"
-            :value="status.value"
-          >
-            {{ productStatusLabels[status.value] }} ({{ status.count }})
-          </option>
-        </select>
-      </div>
-      <button type="submit" class="rounded-md bg-primary px-4 py-2 text-sm font-medium text-white">
-        필터 적용
-      </button>
-    </form>
+    <ProductFilterBar
+      v-model:selectedCategory="selectedCategory"
+      v-model:selectedStatus="selectedStatus"
+      :categories="productsMeta?.categories ?? []"
+      :statuses="productsMeta?.statuses ?? []"
+      @filter="handleFilterProducts"
+    />
     <LoadingState v-if="isInitialLoading" message="상품목록을 불러오는 중입니다." />
     <ErrorState v-else-if="errorMessage" :message="errorMessage" @retry="fetchProducts" />
     <EmptyState
@@ -66,12 +30,6 @@
     </EmptyState>
 
     <div v-else>
-      <div v-if="productsMeta" class="mb-4 flex flex-wrap gap-2 text-sm text-text-secondary">
-        <span v-for="status in productsMeta.statuses" :key="status.value">
-          {{ productStatusLabels[status.value] }} {{ status.count }}
-        </span>
-        <span>카테고리 {{ productsMeta.categories.length }}</span>
-      </div>
       <table class="w-full border-collapse text-sm">
         <thead>
           <tr>
@@ -144,6 +102,7 @@ import ErrorState from '@/components/ui/ErrorState.vue'
 import EmptyState from '@/components/ui/EmptyState.vue'
 import { useAuthErrorHandler } from '@/composables/useAuthErrorHandler'
 import { getQueryPage, getQueryString } from '@/utils/query'
+import ProductFilterBar from '@/components/products/ProductFilterBar.vue'
 
 const thStyle = `border-b border-border px-4 py-3 text-left font-medium text-text-secondary`
 const tdStyle = `border-b border-border px-4 py-3`
@@ -175,12 +134,6 @@ const currentPage = ref(getQueryPage(route.query.page))
 const limit = ref(10)
 
 const { isEmpty, isInitialLoading, isTableLoading } = useListStatus(products, isLoading)
-
-const productStatusLabels: Record<IProduct['status'], string> = {
-  selling: '판매중',
-  hidden: '숨김',
-  soldout: '품절',
-}
 
 const productPermissions = computed(() => {
   return authStore.user?.permissions.products
