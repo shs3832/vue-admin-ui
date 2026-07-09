@@ -85,7 +85,7 @@
 
 <script setup lang="ts">
 import { getProducts, getProductsMetaApi } from '@/api/products'
-import PaginationBar from '@/components/products/PaginationBar.vue'
+
 import ProductStatusBadge from '@/components/products/ProductStatusBadge.vue'
 import { isApiError, type PaginationMeta } from '@/types/api'
 import type { IProduct, ProductsMeta, ProductsQuery } from '@/types/products'
@@ -100,6 +100,7 @@ import EmptyState from '@/components/ui/EmptyState.vue'
 import { useAuthErrorHandler } from '@/composables/useAuthErrorHandler'
 import { getQueryPage, getQueryString } from '@/utils/query'
 import ProductFilterBar from '@/components/products/ProductFilterBar.vue'
+import PaginationBar from '@/components/ui/PaginationBar.vue'
 
 const thStyle = `border-b border-border px-4 py-3 text-left font-medium text-text-secondary`
 const tdStyle = `border-b border-border px-4 py-3`

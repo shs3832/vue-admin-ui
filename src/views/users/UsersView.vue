@@ -83,7 +83,6 @@ import UserRoleBadge from '@/components/users/UserRoleBadge.vue'
 import UserStatusBadge from '@/components/users/UserStatusBadge.vue'
 import { deleteUserApi, fetchUsersApi } from '@/api/users'
 import SearchFilterBar from '@/components/users/SearchFilterBar.vue'
-import PaginationBar from '@/components/users/PaginationBar.vue'
 import { useRoute, useRouter } from 'vue-router'
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
 import { formatDateTime } from '@/utils/date'
@@ -93,6 +92,7 @@ import EmptyState from '@/components/ui/EmptyState.vue'
 import LoadingState from '@/components/ui/LoadingState.vue'
 import { useAuthErrorHandler } from '@/composables/useAuthErrorHandler'
 import { getQueryPage, getQueryString } from '@/utils/query'
+import PaginationBar from '@/components/ui/PaginationBar.vue'
 
 const thStyle = `border-b border-border px-4 py-3 text-left font-medium text-text-secondary`
 const tdStyle = `border-b border-border px-4 py-3`
