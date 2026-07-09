@@ -1,9 +1,10 @@
-import {
-  type IUsersResponse,
-  type CreateUserForm,
-  type UpdateUserForm,
-  type UsersQuery,
-  type IUserResponse,
+import type {
+  IUsersResponse,
+  CreateUserForm,
+  UpdateUserForm,
+  UsersQuery,
+  IUserResponse,
+  UsersMetaResponse,
 } from '@/types/users'
 import { apiClient } from './client'
 
@@ -48,4 +49,8 @@ export const updateUserApi = async (
 export const deleteUserApi = async (accessToken: string, userId: number) => {
   const url = `/users/${userId}`
   return apiClient<void>(url, { method: 'DELETE', accessToken })
+}
+
+export const getUsersMetaApi = async (accessToken: string) => {
+  return apiClient<UsersMetaResponse>(`/users/meta`, { accessToken })
 }

@@ -26,9 +26,9 @@
           :value="searchRole"
         >
           <option value="">전체</option>
-          <option value="admin">관리자</option>
-          <option value="manager">매니저</option>
-          <option value="editor">에디터</option>
+          <option v-for="role in roles" :key="role.value" :value="role.value">
+            {{ userRoleLabels[role.value] }} ({{ role.count }})
+          </option>
         </select>
       </div>
       <div class="flex flex-col gap-1">
@@ -45,9 +45,9 @@
           :value="searchStatus"
         >
           <option value="">전체</option>
-          <option value="active">활성</option>
-          <option value="inactive">비활성</option>
-          <option value="pending">대기</option>
+          <option v-for="status in statuses" :key="status.value" :value="status.value">
+            {{ userStatusLabels[status.value] }} ({{ status.count }})
+          </option>
         </select>
       </div>
       <div class="flex flex-col gap-1">
@@ -97,7 +97,7 @@
 </template>
 
 <script setup lang="ts">
-import type { IUser, UserSort } from '@/types/users'
+import type { IUser, UsersMeta, UserSort } from '@/types/users'
 
 const labelStyle = `text-sm font-medium text-text-secondary`
 const inputStyle = `rounded-md border border-border-strong px-3 py-2 text-sm`
@@ -108,6 +108,8 @@ defineProps<{
   searchStatus: IUser['status'] | ''
   canCreateUser: boolean
   selectedSort: UserSort | ''
+  roles: UsersMeta['roles']
+  statuses: UsersMeta['statuses']
 }>()
 const emit = defineEmits<{
   'update:searchKeyword': [value: string]
@@ -118,6 +120,18 @@ const emit = defineEmits<{
   reset: []
   createUser: []
 }>()
+
+const userRoleLabels: Record<IUser['role'], string> = {
+  admin: '관리자',
+  manager: '매니저',
+  editor: '에디터',
+}
+
+const userStatusLabels: Record<IUser['status'], string> = {
+  active: '활성',
+  inactive: '비활성',
+  pending: '대기',
+}
 </script>
 
 <style scoped></style>

@@ -51,4 +51,23 @@ export type IUserResponse = {
   data: IUser
 }
 
+export type UsersMeta = {
+  statuses: UserStatusMeta[]
+  roles: UserRoleMeta[]
+}
+
+export type UserStatusMeta = {
+  value: IUser['status']
+  count: number
+}
+
+export type UserRoleMeta = {
+  value: IUser['role']
+  count: number
+}
+
+export type UsersMetaResponse = {
+  data: UsersMeta
+}
+
 export type UserSort = 'createdAt:asc' | 'createdAt:desc' | 'name:asc' | 'name:desc'

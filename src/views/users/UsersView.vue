@@ -5,6 +5,8 @@
       v-model:searchRole="searchRole"
       v-model:searchStatus="searchStatus"
       v-model:selectedSort="selectedSort"
+      :roles="usersMeta?.roles ?? []"
+      :statuses="usersMeta?.statuses ?? []"
       @search="handleSearch"
       @reset="handleResetSearch"
       @createUser="handleCreateUser"
@@ -76,13 +78,12 @@
 
 <script setup lang="ts">
 import { useAuthStore } from '@/stores/auth'
-import { computed, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { type PaginationMeta, isApiError } from '@/types/api'
-import type { IUser, UserSort, UsersQuery } from '@/types/users'
-
+import type { UsersMeta, IUser, UserSort, UsersQuery } from '@/types/users'
 import UserRoleBadge from '@/components/users/UserRoleBadge.vue'
 import UserStatusBadge from '@/components/users/UserStatusBadge.vue'
-import { deleteUserApi, fetchUsersApi } from '@/api/users'
+import { deleteUserApi, fetchUsersApi, getUsersMetaApi } from '@/api/users'
 import SearchFilterBar from '@/components/users/SearchFilterBar.vue'
 import { useRoute, useRouter } from 'vue-router'
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
@@ -134,6 +135,7 @@ const currentPage = ref(getQueryPage(route.query.page))
 const limit = ref(10)
 const pagination = ref<PaginationMeta | null>(null)
 const lastDeleteButtonRef = ref<HTMLButtonElement | null>(null)
+const usersMeta = ref<UsersMeta | null>(null)
 const { handleAuthError } = useAuthErrorHandler()
 
 const { hasItems: hasUsers, isInitialLoading, isTableLoading } = useListStatus(users, isLoading)
@@ -200,6 +202,15 @@ const loadUsersList = async () => {
   }
 }
 
+const fetchUsersMeta = async () => {
+  try {
+    const response = await getUsersMetaApi(authStore.accessToken)
+    usersMeta.value = response.data
+  } catch (error) {
+    if (handleAuthError(error)) return
+  }
+}
+
 const handleSearch = () => {
   currentPage.value = 1
   updateUsersQuery()
@@ -254,6 +265,10 @@ const handleCloseModal = () => {
   selectUserForDelete.value = null
   lastDeleteButtonRef.value?.focus()
 }
+
+onMounted(() => {
+  fetchUsersMeta()
+})
 
 watch(
   () => route.query,
