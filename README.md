@@ -30,6 +30,17 @@ API base URL은 환경 변수로 관리합니다. 실제 `.env` 파일은 커밋
 VITE_APP_API_URL=http://localhost:5002
 ```
 
+## Demo Account
+
+외부 리뷰어가 배포된 관리자 UI를 확인할 수 있도록 테스트 전용 계정을 제공합니다.
+
+```txt
+Email: account_test@test.com
+Password: account!@12
+```
+
+이 계정은 포트폴리오 시연과 기능 확인을 위한 용도입니다.
+
 ## Features
 
 ### Auth
