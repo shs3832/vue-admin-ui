@@ -95,6 +95,7 @@ import LoadingState from '@/components/ui/LoadingState.vue'
 import ErrorState from '@/components/ui/ErrorState.vue'
 import EmptyState from '@/components/ui/EmptyState.vue'
 import { useAuthErrorHandler } from '@/composables/useAuthErrorHandler'
+import { getQueryPage } from '@/utils/query'
 
 const thStyle = `border-b border-border px-4 py-3 text-left font-medium text-text-secondary`
 const tdStyle = `border-b border-border px-4 py-3`
@@ -104,18 +105,6 @@ const buttonDefaultStyle = `rounded-md border border-border-strong px-2 py-1 tex
 const { handleAuthError } = useAuthErrorHandler()
 const route = useRoute()
 const router = useRouter()
-
-const getQueryString = (value: unknown) => {
-  return typeof value === 'string' ? value : ''
-}
-
-const getQueryPage = (value: unknown): number => {
-  const queryValue = Number(getQueryString(value))
-
-  if (!Number.isInteger(queryValue)) return 1
-
-  return queryValue < 1 ? 1 : queryValue
-}
 
 const products = ref<IProduct[]>([])
 const pagination = ref<PaginationMeta | null>(null)

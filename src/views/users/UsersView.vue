@@ -92,6 +92,7 @@ import ErrorState from '@/components/ui/ErrorState.vue'
 import EmptyState from '@/components/ui/EmptyState.vue'
 import LoadingState from '@/components/ui/LoadingState.vue'
 import { useAuthErrorHandler } from '@/composables/useAuthErrorHandler'
+import { getQueryPage, getQueryString } from '@/utils/query'
 
 const thStyle = `border-b border-border px-4 py-3 text-left font-medium text-text-secondary`
 const tdStyle = `border-b border-border px-4 py-3`
@@ -101,10 +102,6 @@ const buttonPrimaryStyle = `rounded-md bg-primary px-4 py-2 text-sm font-medium 
 const userRoles: IUser['role'][] = ['admin', 'manager', 'editor']
 const userStatus: IUser['status'][] = ['active', 'inactive', 'pending']
 
-const getQueryString = (value: unknown) => {
-  return typeof value === 'string' ? value : ''
-}
-
 const getQueryRole = (value: unknown): IUser['role'] | '' => {
   const queryValue = getQueryString(value)
   return userRoles.includes(queryValue as IUser['role']) ? (queryValue as IUser['role']) : ''
@@ -113,12 +110,6 @@ const getQueryRole = (value: unknown): IUser['role'] | '' => {
 const getQueryStatus = (value: unknown): IUser['status'] | '' => {
   const queryValue = getQueryString(value)
   return userStatus.includes(queryValue as IUser['status']) ? (queryValue as IUser['status']) : ''
-}
-
-const getQueryPage = (value: unknown): number => {
-  const queryValue = Number(getQueryString(value))
-  if (!Number.isInteger(queryValue)) return 1
-  return queryValue < 1 ? 1 : queryValue
 }
 
 const route = useRoute()
