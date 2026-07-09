@@ -75,7 +75,7 @@
 
 <script setup lang="ts">
 import { useAuthStore } from '@/stores/auth'
-import { computed, onMounted, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { type PaginationMeta, isApiError } from '@/types/api'
 import type { IUser, UsersQuery } from '@/types/users'
 
@@ -84,7 +84,7 @@ import UserStatusBadge from '@/components/users/UserStatusBadge.vue'
 import { deleteUserApi, fetchUsersApi } from '@/api/users'
 import SearchFilterBar from '@/components/users/SearchFilterBar.vue'
 import PaginationBar from '@/components/users/PaginationBar.vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
 import { formatDateTime } from '@/utils/date'
 import { useListStatus } from '@/composables/useListStatus'
@@ -98,17 +98,40 @@ const tdStyle = `border-b border-border px-4 py-3`
 const buttonDefaultStyle = `rounded-md border border-border-strong px-2 py-1 text-sm cursor-pointer disabled:cursor-not-allowed disabled:opacity-50`
 const buttonDangerStyle = `${buttonDefaultStyle} bg-red-500 text-white border-red-500`
 const buttonPrimaryStyle = `rounded-md bg-primary px-4 py-2 text-sm font-medium text-white cursor-pointer hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50`
+const userRoles: IUser['role'][] = ['admin', 'manager', 'editor']
+const userStatus: IUser['status'][] = ['active', 'inactive', 'pending']
 
+const getQueryString = (value: unknown) => {
+  return typeof value === 'string' ? value : ''
+}
+
+const getQueryRole = (value: unknown): IUser['role'] | '' => {
+  const queryValue = getQueryString(value)
+  return userRoles.includes(queryValue as IUser['role']) ? (queryValue as IUser['role']) : ''
+}
+
+const getQueryStatus = (value: unknown): IUser['status'] | '' => {
+  const queryValue = getQueryString(value)
+  return userStatus.includes(queryValue as IUser['status']) ? (queryValue as IUser['status']) : ''
+}
+
+const getQueryPage = (value: unknown): number => {
+  const queryValue = Number(getQueryString(value))
+  if (!Number.isInteger(queryValue)) return 1
+  return queryValue < 1 ? 1 : queryValue
+}
+
+const route = useRoute()
 const router = useRouter()
 const authStore = useAuthStore()
 const isLoading = ref(false)
 const errorMessage = ref('')
 const users = ref<IUser[]>([])
 const selectUserForDelete = ref<IUser | null>(null)
-const searchKeyword = ref('')
-const searchRole = ref<IUser['role'] | ''>('')
-const searchStatus = ref<IUser['status'] | ''>('')
-const currentPage = ref(1)
+const searchKeyword = ref(getQueryString(route.query.keyword))
+const searchRole = ref<IUser['role'] | ''>(getQueryRole(route.query.role))
+const searchStatus = ref<IUser['status'] | ''>(getQueryStatus(route.query.status))
+const currentPage = ref(getQueryPage(route.query.page))
 const limit = ref(10)
 const pagination = ref<PaginationMeta | null>(null)
 const lastDeleteButtonRef = ref<HTMLButtonElement | null>(null)
@@ -132,6 +155,22 @@ const canUpdateUser = computed(() => {
 const canDeleteUser = computed(() => {
   return Boolean(userPermissions.value?.delete)
 })
+
+const createUsersQueryParams = () => {
+  return {
+    keyword: searchKeyword.value || undefined,
+    role: searchRole.value || undefined,
+    status: searchStatus.value || undefined,
+    page: currentPage.value === 1 ? undefined : String(currentPage.value),
+  }
+}
+
+const updateUsersQuery = () => {
+  router.replace({
+    name: 'users',
+    query: createUsersQueryParams(),
+  })
+}
 
 const loadUsersList = async () => {
   isLoading.value = true
@@ -162,12 +201,12 @@ const loadUsersList = async () => {
 
 const handleSearch = () => {
   currentPage.value = 1
-  loadUsersList()
+  updateUsersQuery()
 }
 
 const handleChangePage = (page: number) => {
   currentPage.value = page
-  loadUsersList()
+  updateUsersQuery()
 }
 
 const handleResetSearch = () => {
@@ -175,7 +214,7 @@ const handleResetSearch = () => {
   searchRole.value = ''
   searchStatus.value = ''
   currentPage.value = 1
-  loadUsersList()
+  updateUsersQuery()
 }
 
 const handleCreateUser = () => {
@@ -214,7 +253,16 @@ const handleCloseModal = () => {
   lastDeleteButtonRef.value?.focus()
 }
 
-onMounted(() => {
-  loadUsersList()
-})
+watch(
+  () => route.query,
+  () => {
+    searchKeyword.value = getQueryString(route.query.keyword)
+    searchRole.value = getQueryRole(route.query.role)
+    searchStatus.value = getQueryStatus(route.query.status)
+    currentPage.value = getQueryPage(route.query.page)
+
+    loadUsersList()
+  },
+  { immediate: true },
+)
 </script>
