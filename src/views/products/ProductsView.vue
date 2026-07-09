@@ -1,16 +1,13 @@
 <template>
   <div>
-    <div v-if="canCreateProduct" class="mb-6 flex items-center justify-end gap-4">
-      <button type="button" :class="buttonPrimaryStyle" @click="handleCreateProduct">
-        상품생성
-      </button>
-    </div>
     <ProductFilterBar
       v-model:selectedCategory="selectedCategory"
       v-model:selectedStatus="selectedStatus"
       :categories="productsMeta?.categories ?? []"
       :statuses="productsMeta?.statuses ?? []"
+      :canCreateProduct="canCreateProduct"
       @filter="handleFilterProducts"
+      @create="handleCreateProduct"
     />
     <LoadingState v-if="isInitialLoading" message="상품목록을 불러오는 중입니다." />
     <ErrorState v-else-if="errorMessage" :message="errorMessage" @retry="fetchProducts" />

@@ -34,6 +34,10 @@
       </select>
     </div>
     <button type="submit" :class="buttonPrimaryStyle">필터 적용</button>
+
+    <div v-if="canCreateProduct" class="ml-auto flex items-center justify-end gap-4">
+      <button type="button" :class="buttonPrimaryStyle" @click="emit('create')">상품 생성</button>
+    </div>
   </form>
 </template>
 
@@ -49,12 +53,14 @@ defineProps<{
   selectedStatus: IProduct['status'] | ''
   categories: string[]
   statuses: ProductsMeta['statuses']
+  canCreateProduct: boolean
 }>()
 
 const emit = defineEmits<{
   'update:selectedCategory': [value: string]
   'update:selectedStatus': [value: IProduct['status'] | '']
   filter: []
+  create: []
 }>()
 
 const productStatusLabels: Record<IProduct['status'], string> = {
