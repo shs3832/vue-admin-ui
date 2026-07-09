@@ -13,6 +13,12 @@ export const getProducts = async (accessToken: string, query: ProductsQuery) => 
   const params = new URLSearchParams()
   params.set('limit', String(query.limit))
   params.set('page', String(query.page))
+  if (query.category) {
+    params.set('category', query.category)
+  }
+  if (query.status) {
+    params.set('status', query.status)
+  }
   const queryString = params.toString()
   const url = queryString ? `/products?${queryString}` : `/products`
 

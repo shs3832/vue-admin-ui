@@ -5,7 +5,49 @@
         상품생성
       </button>
     </div>
-
+    <form class="mb-4 flex flex-wrap items-end gap-3" @submit.prevent="handleFilterProducts">
+      <div class="flex flex-col gap-1">
+        <label for="product-category-filter" class="text-sm font-medium text-text-secondary">
+          카테고리
+        </label>
+        <select
+          id="product-category-filter"
+          v-model="selectedCategory"
+          class="rounded-md border border-border-strong px-3 py-2 text-sm"
+        >
+          <option value="">전체</option>
+          <option
+            v-for="category in productsMeta?.categories ?? []"
+            :key="category"
+            :value="category"
+          >
+            {{ category }}
+          </option>
+        </select>
+      </div>
+      <div class="flex flex-col gap-1">
+        <label for="product-status-filter" class="text-sm font-medium text-text-secondary">
+          상태
+        </label>
+        <select
+          id="product-status-filter"
+          v-model="selectedStatus"
+          class="rounded-md border border-border-strong px-3 py-2 text-sm"
+        >
+          <option value="">전체</option>
+          <option
+            v-for="status in productsMeta?.statuses ?? []"
+            :key="status.value"
+            :value="status.value"
+          >
+            {{ productStatusLabels[status.value] }} ({{ status.count }})
+          </option>
+        </select>
+      </div>
+      <button type="submit" class="rounded-md bg-primary px-4 py-2 text-sm font-medium text-white">
+        필터 적용
+      </button>
+    </form>
     <LoadingState v-if="isInitialLoading" message="상품목록을 불러오는 중입니다." />
     <ErrorState v-else-if="errorMessage" :message="errorMessage" @retry="fetchProducts" />
     <EmptyState
@@ -101,7 +143,7 @@ import LoadingState from '@/components/ui/LoadingState.vue'
 import ErrorState from '@/components/ui/ErrorState.vue'
 import EmptyState from '@/components/ui/EmptyState.vue'
 import { useAuthErrorHandler } from '@/composables/useAuthErrorHandler'
-import { getQueryPage } from '@/utils/query'
+import { getQueryPage, getQueryString } from '@/utils/query'
 
 const thStyle = `border-b border-border px-4 py-3 text-left font-medium text-text-secondary`
 const tdStyle = `border-b border-border px-4 py-3`
@@ -112,10 +154,20 @@ const { handleAuthError } = useAuthErrorHandler()
 const route = useRoute()
 const router = useRouter()
 
+const productStatusValues: IProduct['status'][] = ['selling', 'hidden', 'soldout']
+const getProductsStatusQuery = (value: unknown): IProduct['status'] | '' => {
+  const queryValue = getQueryString(value)
+  return productStatusValues.includes(queryValue as IProduct['status'])
+    ? (queryValue as IProduct['status'])
+    : ''
+}
+
 const products = ref<IProduct[]>([])
 const pagination = ref<PaginationMeta | null>(null)
 const productsMeta = ref<ProductsMeta | null>(null)
 const isLoading = ref(false)
+const selectedCategory = ref(getQueryString(route.query.category))
+const selectedStatus = ref(getProductsStatusQuery(route.query.status))
 
 const errorMessage = ref('')
 const authStore = useAuthStore()
@@ -143,6 +195,8 @@ const canUpdateProduct = computed(() => {
 
 const createProductsQueryParams = () => {
   return {
+    category: selectedCategory.value || undefined,
+    status: selectedStatus.value || undefined,
     page: currentPage.value === 1 ? undefined : String(currentPage.value),
   }
 }
@@ -159,6 +213,8 @@ const fetchProducts = async () => {
   errorMessage.value = ''
   try {
     const productQuery: ProductsQuery = {
+      category: selectedCategory.value,
+      status: selectedStatus.value || undefined,
       page: currentPage.value,
       limit: limit.value,
     }
@@ -187,6 +243,11 @@ const fetchProductsMeta = async () => {
   }
 }
 
+const handleFilterProducts = () => {
+  currentPage.value = 1
+  updateProductsQuery()
+}
+
 const handleChangePage = (page: number) => {
   currentPage.value = page
   updateProductsQuery()
@@ -207,6 +268,8 @@ onMounted(() => {
 watch(
   () => route.query,
   () => {
+    selectedCategory.value = getQueryString(route.query.category)
+    selectedStatus.value = getProductsStatusQuery(route.query.status)
     currentPage.value = getQueryPage(route.query.page)
     fetchProducts()
   },

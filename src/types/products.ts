@@ -19,6 +19,8 @@ export type IProductsResponse = {
 }
 
 export type ProductsQuery = {
+  status?: IProduct['status']
+  category?: string
   page: number
   limit: number
 }
