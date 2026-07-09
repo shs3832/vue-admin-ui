@@ -3,11 +3,13 @@
     <ProductFilterBar
       v-model:selectedCategory="selectedCategory"
       v-model:selectedStatus="selectedStatus"
+      v-model:selectedSort="selectedSort"
       :categories="productsMeta?.categories ?? []"
       :statuses="productsMeta?.statuses ?? []"
       :canCreateProduct="canCreateProduct"
       @filter="handleFilterProducts"
       @create="handleCreateProduct"
+      @reset="handleResetSearch"
     />
     <LoadingState v-if="isInitialLoading" message="상품목록을 불러오는 중입니다." />
     <ErrorState v-else-if="errorMessage" :message="errorMessage" @retry="fetchProducts" />
@@ -88,7 +90,7 @@ import { getProducts, getProductsMetaApi } from '@/api/products'
 
 import ProductStatusBadge from '@/components/products/ProductStatusBadge.vue'
 import { isApiError, type PaginationMeta } from '@/types/api'
-import type { IProduct, ProductsMeta, ProductsQuery } from '@/types/products'
+import type { IProduct, ProductsMeta, ProductsQuery, ProductsSort } from '@/types/products'
 import { useAuthStore } from '@/stores/auth'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
@@ -112,11 +114,24 @@ const route = useRoute()
 const router = useRouter()
 
 const productStatusValues: IProduct['status'][] = ['selling', 'hidden', 'soldout']
+const productSortValues: ProductsSort[] = [
+  'createdAt:asc',
+  'createdAt:desc',
+  'price:asc',
+  'price:desc',
+  'stock:asc',
+  'stock:desc',
+]
 const getProductsStatusQuery = (value: unknown): IProduct['status'] | '' => {
   const queryValue = getQueryString(value)
   return productStatusValues.includes(queryValue as IProduct['status'])
     ? (queryValue as IProduct['status'])
     : ''
+}
+
+const getProductsSortQuery = (value: unknown): ProductsSort | '' => {
+  const queryValue = getQueryString(value)
+  return productSortValues.includes(queryValue as ProductsSort) ? (queryValue as ProductsSort) : ''
 }
 
 const products = ref<IProduct[]>([])
@@ -125,7 +140,7 @@ const productsMeta = ref<ProductsMeta | null>(null)
 const isLoading = ref(false)
 const selectedCategory = ref(getQueryString(route.query.category))
 const selectedStatus = ref(getProductsStatusQuery(route.query.status))
-
+const selectedSort = ref(getProductsSortQuery(route.query.sort))
 const errorMessage = ref('')
 const authStore = useAuthStore()
 const currentPage = ref(getQueryPage(route.query.page))
@@ -148,6 +163,7 @@ const createProductsQueryParams = () => {
   return {
     category: selectedCategory.value || undefined,
     status: selectedStatus.value || undefined,
+    sort: selectedSort.value || undefined,
     page: currentPage.value === 1 ? undefined : String(currentPage.value),
   }
 }
@@ -166,6 +182,7 @@ const fetchProducts = async () => {
     const productQuery: ProductsQuery = {
       category: selectedCategory.value,
       status: selectedStatus.value || undefined,
+      sort: selectedSort.value || undefined,
       page: currentPage.value,
       limit: limit.value,
     }
@@ -208,6 +225,14 @@ const handleCreateProduct = () => {
   router.push({ name: 'productCreate' })
 }
 
+const handleResetSearch = () => {
+  selectedCategory.value = ''
+  selectedStatus.value = ''
+  currentPage.value = 1
+  selectedSort.value = ''
+  updateProductsQuery()
+}
+
 const handleProductEdit = (id: number) => {
   router.push({ name: 'productEdit', params: { id: id } })
 }
@@ -222,6 +247,7 @@ watch(
     selectedCategory.value = getQueryString(route.query.category)
     selectedStatus.value = getProductsStatusQuery(route.query.status)
     currentPage.value = getQueryPage(route.query.page)
+    selectedSort.value = getProductsSortQuery(route.query.sort)
     fetchProducts()
   },
   { immediate: true },

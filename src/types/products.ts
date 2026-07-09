@@ -21,6 +21,7 @@ export type IProductsResponse = {
 export type ProductsQuery = {
   status?: IProduct['status']
   category?: string
+  sort?: ProductsSort
   page: number
   limit: number
 }
@@ -67,3 +68,11 @@ export type ProductsMetaResponse = {
 }
 
 export type ProductsFormErrors = Partial<Record<keyof ProductForm, string>>
+
+export type ProductsSort =
+  | 'createdAt:asc'
+  | 'createdAt:desc'
+  | 'price:asc'
+  | 'price:desc'
+  | 'stock:asc'
+  | 'stock:desc'

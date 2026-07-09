@@ -19,6 +19,9 @@ export const getProducts = async (accessToken: string, query: ProductsQuery) => 
   if (query.status) {
     params.set('status', query.status)
   }
+  if (query.sort) {
+    params.set('sort', query.sort)
+  }
   const queryString = params.toString()
   const url = queryString ? `/products?${queryString}` : `/products`
 
