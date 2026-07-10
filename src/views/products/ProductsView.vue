@@ -75,6 +75,14 @@
               >
                 수정
               </button>
+              <button
+                v-if="canUpdateProductStatus"
+                type="button"
+                :class="[buttonDefaultStyle, canUpdateProduct ? 'ml-2' : '']"
+                @click="handleOpenStatusDialog(product, $event)"
+              >
+                상태 변경
+              </button>
               <!-- <button type="button" :class="[buttonDangerStyle, 'ml-2']">삭제</button> -->
             </td>
           </tr>
@@ -82,12 +90,46 @@
       </table>
       <PaginationBar v-if="pagination" :pagination="pagination" @changePage="handleChangePage" />
     </div>
+    <ConfirmDialog
+      :open="isStatusDialogOpen"
+      title="상품 상태 변경"
+      :description="`${selectedProductForStatus?.name ?? '선택한'} 상품의 상태를 변경합니다.`"
+      :confirmLabel="isUpdatingStatus ? '변경 중' : '상태 변경'"
+      :confirmDisabled="isUpdatingStatus"
+      :isProcessing="isUpdatingStatus"
+      confirmVariant="primary"
+      @confirm="handleConfirmProductStatus"
+      @cancel="handleCloseStatusDialog"
+    >
+      <div :class="boxStyle">
+        <label for="product-status-change" :class="labelStyle">변경할 상태</label>
+        <select
+          id="product-status-change"
+          v-model="nextProductStatus"
+          :disabled="isUpdatingStatus"
+          :aria-describedby="statusActionError ? 'product-status-action-error' : undefined"
+          :class="selectStyle"
+        >
+          <option value="selling">판매중</option>
+          <option value="hidden">숨김</option>
+          <option value="soldout">품절</option>
+        </select>
+        <p
+          :class="errorStyle"
+          v-if="statusActionError"
+          role="alert"
+          id="product-status-action-error"
+        >
+          {{ statusActionError }}
+        </p>
+      </div>
+    </ConfirmDialog>
   </div>
 </template>
 
 <script setup lang="ts">
-import { getProducts, getProductsMetaApi } from '@/api/products'
-
+import { getProducts, getProductsMetaApi, updateProductStatusApi } from '@/api/products'
+import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
 import ProductStatusBadge from '@/components/products/ProductStatusBadge.vue'
 import { isApiError, type PaginationMeta } from '@/types/api'
 import type { IProduct, ProductsMeta, ProductsQuery, ProductsSort } from '@/types/products'
@@ -108,6 +150,10 @@ const thStyle = `border-b border-border px-4 py-3 text-left font-medium text-tex
 const tdStyle = `border-b border-border px-4 py-3`
 const buttonPrimaryStyle = `rounded-md bg-primary px-4 py-2 text-sm font-medium text-white cursor-pointer hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50`
 const buttonDefaultStyle = `rounded-md border border-border-strong px-2 py-1 text-sm cursor-pointer disabled:cursor-not-allowed disabled:opacity-50`
+const boxStyle = `flex flex-col gap-1`
+const labelStyle = `block mb-2 text-sm font-medium text-text-secondary`
+const selectStyle = `h-9 w-full rounded-md border border-border-strong bg-white px-3 text-sm focus-visible:outline disabled:bg-muted disabled:cursor-not-allowed`
+const errorStyle = `text-sm text-red-600`
 
 const { handleAuthError } = useAuthErrorHandler()
 const route = useRoute()
@@ -137,6 +183,11 @@ const getProductsSortQuery = (value: unknown): ProductsSort | '' => {
 const products = ref<IProduct[]>([])
 const pagination = ref<PaginationMeta | null>(null)
 const productsMeta = ref<ProductsMeta | null>(null)
+const selectedProductForStatus = ref<IProduct | null>(null)
+const nextProductStatus = ref<IProduct['status'] | ''>('')
+const lastStatusButtonRef = ref<HTMLButtonElement | null>(null)
+const isUpdatingStatus = ref(false)
+const statusActionError = ref('')
 const isLoading = ref(false)
 const selectedCategory = ref(getQueryString(route.query.category))
 const selectedStatus = ref(getProductsStatusQuery(route.query.status))
@@ -157,6 +208,14 @@ const canCreateProduct = computed(() => {
 })
 const canUpdateProduct = computed(() => {
   return Boolean(productPermissions.value?.update)
+})
+
+const canUpdateProductStatus = computed(() => {
+  return Boolean(productPermissions.value?.updateStatus)
+})
+
+const isStatusDialogOpen = computed(() => {
+  return selectedProductForStatus.value !== null
 })
 
 const createProductsQueryParams = () => {
@@ -235,6 +294,53 @@ const handleResetSearch = () => {
 
 const handleProductEdit = (id: number) => {
   router.push({ name: 'productEdit', params: { id: id } })
+}
+
+const handleOpenStatusDialog = (product: IProduct, event: MouseEvent) => {
+  statusActionError.value = ''
+  selectedProductForStatus.value = product
+  nextProductStatus.value = product.status
+  lastStatusButtonRef.value = event.currentTarget as HTMLButtonElement
+}
+
+const closeStatusDialog = () => {
+  selectedProductForStatus.value = null
+  nextProductStatus.value = ''
+  lastStatusButtonRef.value?.focus()
+}
+
+const handleCloseStatusDialog = () => {
+  if (isUpdatingStatus.value) return
+
+  closeStatusDialog()
+}
+
+const handleConfirmProductStatus = async () => {
+  if (isUpdatingStatus.value) return
+  const product = selectedProductForStatus.value
+  const nextStatus = nextProductStatus.value
+  if (!product || !nextStatus) return
+
+  if (product.status === nextStatus) {
+    statusActionError.value = '현재 상태와 다른 상태를 선택해주세요.'
+    return
+  }
+  isUpdatingStatus.value = true
+  statusActionError.value = ''
+  try {
+    await updateProductStatusApi(authStore.accessToken, { status: nextStatus }, product.id)
+    closeStatusDialog()
+    await Promise.all([fetchProducts(), fetchProductsMeta()])
+  } catch (error) {
+    if (handleAuthError(error)) return
+    if (isApiError(error)) {
+      statusActionError.value = error.message
+    } else {
+      statusActionError.value = '상품 상태를 변경하지 못했습니다.'
+    }
+  } finally {
+    isUpdatingStatus.value = false
+  }
 }
 
 onMounted(() => {

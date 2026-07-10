@@ -6,6 +6,7 @@ import type {
   ProductDetailResponse,
   UploadImageResponse,
   ProductsMetaResponse,
+  UpdateProductStatusPayload,
 } from '@/types/products'
 import { apiClient } from './client'
 
@@ -58,6 +59,18 @@ export const updateProductApi = async (
 ) => {
   return apiClient<ProductDetailResponse>(`/products/${id}`, {
     method: 'PUT',
+    accessToken,
+    body: payload,
+  })
+}
+
+export const updateProductStatusApi = async (
+  accessToken: string,
+  payload: UpdateProductStatusPayload,
+  id: number,
+) => {
+  return apiClient<ProductDetailResponse>(`/products/${id}/status`, {
+    method: 'PATCH',
     accessToken,
     body: payload,
   })

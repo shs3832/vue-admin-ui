@@ -76,3 +76,7 @@ export type ProductsSort =
   | 'price:desc'
   | 'stock:asc'
   | 'stock:desc'
+
+export type UpdateProductStatusPayload = {
+  status: IProduct['status']
+}

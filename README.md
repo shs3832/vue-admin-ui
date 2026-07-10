@@ -6,7 +6,7 @@
 
 현재는 로그인, 대시보드, 사용자 관리, 상품 관리, 알림, 활동 로그까지 실제 API와 연결된 관리자 UI 흐름을 구현했습니다.
 
-심화 과정에서는 API client, refresh token, permissions 기반 UI, route meta layout, form/dialog 접근성, URL query 기반 목록 상태 복원, meta API 기반 필터 옵션까지 확장하며 운영 UI에서 반복되는 구조를 정리하고 있습니다.
+심화 과정에서는 API client, refresh token, permissions 기반 UI, route meta layout, form/dialog 접근성, URL query 기반 목록 상태 복원, meta API 기반 필터 옵션, 상품 단건 status 변경까지 확장하며 운영 UI에서 반복되는 구조를 정리하고 있습니다.
 
 ## Tech Stack
 
@@ -84,6 +84,8 @@ Password: account!@12
 - sort
 - URL query 기반 필터/정렬/페이지 상태 복원
 - meta API 기반 category/status filter option 표시
+- permissions 기반 상품 단건 status 변경
+- 상태 변경 성공 후 상품 목록과 meta count 동기화
 - 상품 생성 form
 - 상품 수정 form
 - 이미지 업로드 API 연동
@@ -183,6 +185,19 @@ Users와 Products 필터 옵션은 백엔드 meta API 응답을 사용합니다.
 
 이를 통해 프론트에 고정된 필터 목록만 두지 않고, 백엔드 데이터 상태에 맞춰 운영자가 선택할 수 있는 조건을 표시합니다.
 
+### Product Status Action
+
+Products 목록에서는 `products.updateStatus` 권한이 있는 운영자에게 단건 상태 변경 액션을 제공합니다.
+
+```txt
+상품 선택
+-> ConfirmDialog에서 다음 status 선택
+-> PATCH /products/:id/status
+-> 상품 목록과 products meta 동시 재조회
+```
+
+현재 상태와 같은 값은 요청 전에 차단하고, 상태 변경 실패는 목록 전체 오류와 분리해 dialog 안에 표시합니다. 요청 중에는 select와 확인/취소 버튼을 비활성화하고 ESC 닫기를 막아, 이미 시작된 요청이 취소된 것처럼 보이는 혼란을 줄였습니다.
+
 ### File Upload Flow
 
 초기 구현에서는 파일 선택 시점에 바로 업로드했지만, 이미지 변경이나 등록 취소 시 불필요한 업로드가 발생할 수 있었습니다.
@@ -215,7 +230,7 @@ Notifications와 Activity Logs는 데이터를 수정하는 화면이 아니라,
 서버에서 내려오는 `createdAt` 문자열은 `src/utils/date.ts`의 `formatDateTime` 유틸로 변환합니다.
 
 ```ts
-formatDateTime("2026-06-24T00:00:00.000Z")
+formatDateTime('2026-06-24T00:00:00.000Z')
 ```
 
 날짜 표시 규칙을 한 곳에 모아 Notifications, Activity Logs 등에서 재사용할 수 있게 했습니다.
@@ -322,6 +337,7 @@ npm run build
 - form/dialog 접근성 focus flow 개선
 - URL query 기반 목록 상태 복원
 - sort/pagination/meta API 기반 필터 옵션
+- permissions와 ConfirmDialog 기반 상품 단건 status 변경
 - loading/empty/error 상태 처리
 - API/type/formatting/list state 책임 분리
 - 공통 LoadingState/ErrorState/EmptyState UI 패턴 정리
@@ -334,7 +350,7 @@ npm run build
 
 - Users/Products input, select, outline button, table row 시각 대비 개선
 - 반복 스타일이 충분히 쌓인 뒤 BaseButton/BaseInput/FormField 공통화 검토
-- status 변경/bulk action 검토
+- checkbox 선택 상태와 bulk status action 검토
 - 핵심 유틸/composable/API error handling 테스트 추가
 - Component Preview 확장
 - React/Next 재구현 설계
