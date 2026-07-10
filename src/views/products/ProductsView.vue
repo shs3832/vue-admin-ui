@@ -11,6 +11,9 @@
       @create="handleCreateProduct"
       @reset="handleResetSearch"
     />
+    <p v-if="bulkStatusResultMessage" class="mb-3 text-sm text-text-secondary" role="status">
+      {{ bulkStatusResultMessage }}
+    </p>
     <LoadingState v-if="isInitialLoading" message="상품목록을 불러오는 중입니다." />
     <ErrorState v-else-if="errorMessage" :message="errorMessage" @retry="fetchProducts" />
     <EmptyState
@@ -29,9 +32,47 @@
     </EmptyState>
 
     <div v-else>
+      <div
+        v-if="canBulkUpdateProductStatus && selectedProductIds.length > 0"
+        class="mb-3 flex items-center gap-3"
+      >
+        <p class="text-sm text-text-secondary" role="status">
+          {{ selectedProductIds.length }}개 상품 선택됨
+        </p>
+
+        <label for="bulk-product-status" class="sr-only"> 일괄 변경할 상품 상태 </label>
+
+        <select
+          id="bulk-product-status"
+          v-model="bulkNextStatus"
+          :class="[selectStyle, 'max-w-48']"
+        >
+          <option value="">변경할 상태 선택</option>
+          <option value="selling">판매중</option>
+          <option value="hidden">숨김</option>
+          <option value="soldout">품절</option>
+        </select>
+        <button
+          type="button"
+          :class="buttonPrimaryStyle"
+          :disabled="!bulkNextStatus"
+          @click="handleOpenBulkStatusDialog($event)"
+        >
+          일괄 상태 변경
+        </button>
+      </div>
       <table class="w-full border-collapse text-sm">
         <thead>
           <tr>
+            <th v-if="canBulkUpdateProductStatus" :class="thStyle">
+              <input
+                type="checkbox"
+                :checked="isAllCurrentPageSelected"
+                :indeterminate="isSomeCurrentPageSelected"
+                aria-label="현재 페이지 상품 전체 선택"
+                @change="handleToggleAllCurrentPage"
+              />
+            </th>
             <th :class="thStyle">이미지</th>
             <th :class="thStyle">상품명</th>
             <th :class="thStyle">카테고리</th>
@@ -43,9 +84,19 @@
         </thead>
         <tbody>
           <tr v-if="isTableLoading">
-            <td :class="[tdStyle, 'text-center']" colspan="7">제품목록을 불러오는 중입니다.</td>
+            <td :class="[tdStyle, 'text-center']" :colspan="canBulkUpdateProductStatus ? 8 : 7">
+              제품목록을 불러오는 중입니다.
+            </td>
           </tr>
           <tr v-for="product in products" :key="product.id">
+            <td v-if="canBulkUpdateProductStatus" :class="tdStyle">
+              <input
+                v-model="selectedProductIds"
+                type="checkbox"
+                :value="product.id"
+                :aria-label="`${product.name} 선택`"
+              />
+            </td>
             <td :class="tdStyle">
               <img
                 v-if="product.thumbnailUrl"
@@ -88,6 +139,7 @@
           </tr>
         </tbody>
       </table>
+
       <PaginationBar v-if="pagination" :pagination="pagination" @changePage="handleChangePage" />
     </div>
     <ConfirmDialog
@@ -114,6 +166,7 @@
           <option value="hidden">숨김</option>
           <option value="soldout">품절</option>
         </select>
+
         <p
           :class="errorStyle"
           v-if="statusActionError"
@@ -124,11 +177,38 @@
         </p>
       </div>
     </ConfirmDialog>
+    <ConfirmDialog
+      :open="isBulkStatusDialogOpen"
+      title="상품 상태 일괄 변경"
+      :description="`선택한 ${selectedProductIds.length}개 상품의 상태를 변경하시겠습니까?`"
+      :confirm-label="isBulkUpdatingStatus ? '변경 중' : '상태 변경'"
+      confirm-variant="primary"
+      :confirm-disabled="isBulkUpdatingStatus"
+      :isProcessing="isBulkUpdatingStatus"
+      @cancel="handleCloseBulkStatusDialog"
+      @confirm="handleConfirmBulkStatus"
+    >
+      <div class="space-y-3">
+        <div class="flex items-center gap-2">
+          <span class="text-sm text-text-secondary">변경 상태</span>
+          <ProductStatusBadge v-if="bulkNextStatus" :status="bulkNextStatus" />
+        </div>
+
+        <p v-if="bulkStatusActionError" :class="errorStyle" role="alert">
+          {{ bulkStatusActionError }}
+        </p>
+      </div>
+    </ConfirmDialog>
   </div>
 </template>
 
 <script setup lang="ts">
-import { getProducts, getProductsMetaApi, updateProductStatusApi } from '@/api/products'
+import {
+  bulkUpdateProductStatusApi,
+  getProducts,
+  getProductsMetaApi,
+  updateProductStatusApi,
+} from '@/api/products'
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
 import ProductStatusBadge from '@/components/products/ProductStatusBadge.vue'
 import { isApiError, type PaginationMeta } from '@/types/api'
@@ -186,12 +266,19 @@ const productsMeta = ref<ProductsMeta | null>(null)
 const selectedProductForStatus = ref<IProduct | null>(null)
 const nextProductStatus = ref<IProduct['status'] | ''>('')
 const lastStatusButtonRef = ref<HTMLButtonElement | null>(null)
+const isBulkStatusDialogOpen = ref(false)
+const lastBulkStatusButtonRef = ref<HTMLButtonElement | null>(null)
+const isBulkUpdatingStatus = ref(false)
+const bulkStatusActionError = ref('')
+const bulkStatusResultMessage = ref('')
 const isUpdatingStatus = ref(false)
 const statusActionError = ref('')
 const isLoading = ref(false)
 const selectedCategory = ref(getQueryString(route.query.category))
 const selectedStatus = ref(getProductsStatusQuery(route.query.status))
 const selectedSort = ref(getProductsSortQuery(route.query.sort))
+const selectedProductIds = ref<number[]>([])
+const bulkNextStatus = ref<IProduct['status'] | ''>('')
 const errorMessage = ref('')
 const authStore = useAuthStore()
 const currentPage = ref(getQueryPage(route.query.page))
@@ -214,8 +301,25 @@ const canUpdateProductStatus = computed(() => {
   return Boolean(productPermissions.value?.updateStatus)
 })
 
+const canBulkUpdateProductStatus = computed(() => {
+  return Boolean(productPermissions.value?.bulkUpdateStatus)
+})
+
 const isStatusDialogOpen = computed(() => {
   return selectedProductForStatus.value !== null
+})
+
+const isAllCurrentPageSelected = computed(() => {
+  return (
+    products.value.length > 0 &&
+    products.value.every((product) => {
+      return selectedProductIds.value.includes(product.id)
+    })
+  )
+})
+
+const isSomeCurrentPageSelected = computed(() => {
+  return selectedProductIds.value.length > 0 && !isAllCurrentPageSelected.value
 })
 
 const createProductsQueryParams = () => {
@@ -235,6 +339,8 @@ const updateProductsQuery = () => {
 }
 
 const fetchProducts = async () => {
+  selectedProductIds.value = []
+  bulkStatusResultMessage.value = ''
   isLoading.value = true
   errorMessage.value = ''
   try {
@@ -289,6 +395,8 @@ const handleResetSearch = () => {
   selectedStatus.value = ''
   currentPage.value = 1
   selectedSort.value = ''
+  selectedProductIds.value = []
+  bulkStatusResultMessage.value = ''
   updateProductsQuery()
 }
 
@@ -343,6 +451,66 @@ const handleConfirmProductStatus = async () => {
   }
 }
 
+const handleToggleAllCurrentPage = (event: Event) => {
+  const checked = (event.currentTarget as HTMLInputElement).checked
+
+  selectedProductIds.value = checked
+    ? products.value.map((product) => {
+        return product.id
+      })
+    : []
+}
+
+const handleOpenBulkStatusDialog = (event: MouseEvent) => {
+  if (selectedProductIds.value.length === 0) return
+  if (!bulkNextStatus.value) return
+
+  bulkStatusActionError.value = ''
+  lastBulkStatusButtonRef.value = event.currentTarget as HTMLButtonElement
+  isBulkStatusDialogOpen.value = true
+}
+
+const handleCloseBulkStatusDialog = () => {
+  if (isBulkUpdatingStatus.value) return
+
+  isBulkStatusDialogOpen.value = false
+  lastBulkStatusButtonRef.value?.focus()
+}
+
+const handleConfirmBulkStatus = async () => {
+  if (isBulkUpdatingStatus.value) return
+
+  const ids = [...selectedProductIds.value]
+  const status = bulkNextStatus.value
+
+  if (ids.length === 0 || !status) return
+  isBulkUpdatingStatus.value = true
+  bulkStatusActionError.value = ''
+  bulkStatusResultMessage.value = ''
+  try {
+    const response = await bulkUpdateProductStatusApi(authStore.accessToken, { ids, status })
+    const updatedCount = response.data.updatedCount
+    const skippedCount = ids.length - updatedCount
+    const resultMessage =
+      skippedCount === 0
+        ? `${updatedCount}개 상품의 상태를 변경했습니다.`
+        : `요청한 ${ids.length}개 중 ${updatedCount}개 상품만 변경했습니다. 목록을 확인해주세요.`
+
+    isBulkStatusDialogOpen.value = false
+    await Promise.all([fetchProducts(), fetchProductsMeta()])
+    bulkStatusResultMessage.value = resultMessage
+  } catch (error) {
+    if (handleAuthError(error)) return
+    if (isApiError(error)) {
+      bulkStatusActionError.value = error.message
+    } else {
+      bulkStatusActionError.value = '상품 상태를 일괄 변경하지 못했습니다.'
+    }
+  } finally {
+    isBulkUpdatingStatus.value = false
+  }
+}
+
 onMounted(() => {
   fetchProductsMeta()
 })
@@ -357,5 +525,14 @@ watch(
     fetchProducts()
   },
   { immediate: true },
+)
+
+watch(
+  () => selectedProductIds.value.length,
+  (selectedCount) => {
+    if (selectedCount === 0) {
+      bulkNextStatus.value = ''
+    }
+  },
 )
 </script>

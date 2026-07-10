@@ -80,3 +80,18 @@ export type ProductsSort =
 export type UpdateProductStatusPayload = {
   status: IProduct['status']
 }
+
+export type BulkUpdateProductStatusPayload = {
+  ids: number[]
+  status: IProduct['status']
+}
+
+export type BulkUpdateProductStatusResult = {
+  ids: number[]
+  updatedCount: number
+  status: IProduct['status']
+}
+
+export type BulkUpdateProductStatusResponse = {
+  data: BulkUpdateProductStatusResult
+}
