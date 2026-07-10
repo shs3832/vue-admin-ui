@@ -339,14 +339,17 @@ npm run type-check
 npm test
 ```
 
-Vitest 기반의 핵심 단위 테스트를 작은 범위부터 추가하고 있습니다.
+Vitest, Vue Test Utils, jsdom을 사용해 공통 로직과 핵심 UI 계약을 작은 범위부터 검증합니다.
 
 - URL query helper의 문자열/page 정규화
 - API client의 정상 JSON, 204, ApiError 변환과 상세 정보 보존
 - Authorization header와 JSON body 구성
 - FormData 원본 전달과 Content-Type 처리
+- PaginationBar의 첫/중간/마지막 번호 범위, 페이지 emit, 경계 버튼 비활성화
+- ProductFilterBar의 생성 권한별 버튼 노출
+- 폼 검증 실패 시 첫 오류 필드 focus 이동
 
-현재 테스트는 Node 환경의 순수 함수와 공통 API client를 대상으로 하며, Vue 컴포넌트 렌더링 테스트는 별도 단계로 진행합니다.
+순수 함수와 공통 API client는 Node 환경에서 빠르게 실행하고, DOM이 필요한 컴포넌트와 focus 테스트만 jsdom 환경으로 분리합니다. 현재 5개 테스트 파일의 22개 사례가 핵심 운영 정책과 회귀 위험을 보호합니다.
 
 ## Build
 
@@ -385,7 +388,7 @@ npm run build
 - Users/Products input, select, outline button, table row 시각 대비 개선
 - 반복 스타일이 충분히 쌓인 뒤 BaseButton/BaseInput/FormField 공통화 검토
 - 벌크 일부 실패 시 상품별 실패 ID와 사유를 제공하는 API 응답 확장 검토
-- Vue Test Utils 기반 PaginationBar/permission UI 컴포넌트 테스트 추가
+- ConfirmDialog/field validation 등 후속 상호작용 테스트는 실제 회귀 위험이 커질 때 추가
 - Component Preview 확장
 - React/Next 재구현 설계
 - README 최종 스크린샷/시연 이미지 추가

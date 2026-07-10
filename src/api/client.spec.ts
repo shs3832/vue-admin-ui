@@ -2,7 +2,10 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { apiClient } from './client'
 import { ApiError } from '@/types/api'
 
+// 테스트 대상인 apiClient는 실제 코드를 실행하고, 외부 네트워크 경계인 fetch만 mock으로 교체한다.
+// 기본 읽기 순서: 가짜 Response 준비(Arrange) -> apiClient 실행(Act) -> 반환값/요청 정보 검증(Assert).
 afterEach(() => {
+  // spyOn으로 교체한 전역 fetch가 다른 테스트에 남지 않도록 원본 함수로 복구한다.
   vi.restoreAllMocks()
 })
 
@@ -91,7 +94,9 @@ describe('apiClient', () => {
 
     expect(fetchMock).toHaveBeenCalledOnce()
 
+    // mock.calls는 [호출 횟수][함수 인자] 구조다. fetch의 두 번째 인자가 request options다.
     const requestOptions = fetchMock.mock.calls[0]?.[1]
+    // headers 옵션은 여러 형태가 가능하므로 Headers 객체로 정규화한 뒤 값을 읽는다.
     const headers = new Headers(requestOptions?.headers)
 
     expect(headers.get('Authorization')).toBe('Bearer test-token')
@@ -139,6 +144,7 @@ describe('apiClient', () => {
     const requestOptions = fetchMock.mock.calls[0]?.[1]
     const headers = new Headers(requestOptions?.headers)
 
+    // FormData는 JSON.stringify하지 않고 원본을 전달하며, multipart boundary는 브라우저가 설정한다.
     expect(requestOptions?.body).toBe(formData)
     expect(headers.has('Content-Type')).toBe(false)
   })
