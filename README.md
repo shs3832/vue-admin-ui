@@ -333,6 +333,21 @@ npm run dev
 npm run type-check
 ```
 
+## Test
+
+```sh
+npm test
+```
+
+Vitest 기반의 핵심 단위 테스트를 작은 범위부터 추가하고 있습니다.
+
+- URL query helper의 문자열/page 정규화
+- API client의 정상 JSON, 204, ApiError 변환과 상세 정보 보존
+- Authorization header와 JSON body 구성
+- FormData 원본 전달과 Content-Type 처리
+
+현재 테스트는 Node 환경의 순수 함수와 공통 API client를 대상으로 하며, Vue 컴포넌트 렌더링 테스트는 별도 단계로 진행합니다.
+
 ## Build
 
 ```sh
@@ -370,7 +385,7 @@ npm run build
 - Users/Products input, select, outline button, table row 시각 대비 개선
 - 반복 스타일이 충분히 쌓인 뒤 BaseButton/BaseInput/FormField 공통화 검토
 - 벌크 일부 실패 시 상품별 실패 ID와 사유를 제공하는 API 응답 확장 검토
-- 핵심 유틸/composable/API error handling 테스트 추가
+- Vue Test Utils 기반 PaginationBar/permission UI 컴포넌트 테스트 추가
 - Component Preview 확장
 - React/Next 재구현 설계
 - README 최종 스크린샷/시연 이미지 추가
