@@ -138,6 +138,19 @@ API 요청은 `src/api/client.ts`의 공통 client를 통해 처리합니다.
 
 로그인, `/auth/me`, `/auth/refresh` 응답의 user 정보는 `src/types/auth.ts`의 `AuthUser` 타입으로 관리합니다.
 
+현재 구현은 새로고침 후 인증 복원 구조를 단순하게 유지하기 위해 access token을 localStorage에 저장합니다. 브라우저 JavaScript가 접근할 수 있어 XSS 발생 시 노출될 수 있다는 한계가 있으며, refresh token은 JavaScript에서 읽지 못하는 httpOnly cookie로 전달받습니다.
+
+후속 React/Next 프로젝트에서는 이 절충을 개선하는 실험으로 다음 흐름을 우선 검토합니다.
+
+```txt
+로그인/refresh 응답의 access token
+-> client memory에만 보관
+-> 앱 초기화 시 httpOnly refresh cookie로 access token 재발급
+-> 로그아웃/refresh 실패 시 memory 인증 상태 초기화
+```
+
+메모리 기반 저장도 XSS 자체를 막는 방식은 아니지만, 토큰을 localStorage에 지속 저장하지 않아 브라우저에 남는 노출 범위를 줄이는 선택으로 다룹니다. 실제 인증 보안은 저장 위치 하나가 아니라 CSP, 입력 처리, cookie 설정, refresh rotation, 만료·폐기 정책과 함께 검토해야 합니다.
+
 백엔드에서 내려주는 `permissions` 객체를 기준으로 users/products 주요 액션 버튼을 노출합니다.
 
 - `users.create/update/delete`
@@ -393,5 +406,5 @@ npm run build
 - 벌크 일부 실패 시 상품별 실패 ID와 사유를 제공하는 API 응답 확장 검토
 - ConfirmDialog/field validation 등 후속 상호작용 테스트는 실제 회귀 위험이 커질 때 추가
 - modal/drawer focus trap은 필요성과 복잡도를 비교한 뒤 후속 검토
-- React/Next 재구현 설계
+- React/Next에서 memory 기반 access token과 httpOnly refresh cookie 인증 복원 흐름 검토
 - README 최종 스크린샷/시연 이미지 추가
