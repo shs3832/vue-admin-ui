@@ -15,9 +15,12 @@
 
     <LoadingState v-if="isInitialLoading" message="목록을 불러오는 중입니다." />
     <ErrorState v-else-if="errorMessage" :message="errorMessage" @retry="loadUsersList" />
-    <div v-else-if="hasUsers">
-      <table class="w-full border-collapse text-sm">
-        <thead>
+    <div
+      v-else-if="hasUsers"
+      class="overflow-x-auto rounded-container border border-border bg-bg-surface"
+    >
+      <table class="w-full min-w-[900px] border-collapse text-sm">
+        <thead class="bg-bg-page">
           <tr>
             <th :class="thStyle">이름</th>
             <th :class="thStyle">이메일</th>
@@ -28,11 +31,11 @@
             <th :class="thStyle">관리</th>
           </tr>
         </thead>
-        <tbody>
+        <tbody class="[&>tr:last-child>td]:border-b-0">
           <tr v-if="isTableLoading">
             <td :class="[tdStyle, 'text-center']" colspan="7">목록을 불러오는 중입니다.</td>
           </tr>
-          <tr v-for="item in users" :key="item.id">
+          <tr v-for="item in users" :key="item.id" class="transition-colors hover:bg-bg-page">
             <td :class="tdStyle">{{ item.name }}</td>
             <td :class="tdStyle">{{ item.email }}</td>
             <td :class="tdStyle"><UserRoleBadge :role="item.role" /></td>
@@ -96,11 +99,11 @@ import { useAuthErrorHandler } from '@/composables/useAuthErrorHandler'
 import { getQueryPage, getQueryString } from '@/utils/query'
 import PaginationBar from '@/components/ui/PaginationBar.vue'
 
-const thStyle = `border-b border-border px-4 py-3 text-left font-medium text-text-secondary`
-const tdStyle = `border-b border-border px-4 py-3`
-const buttonDefaultStyle = `rounded-md border border-border-strong px-2 py-1 text-sm cursor-pointer disabled:cursor-not-allowed disabled:opacity-50`
-const buttonDangerStyle = `${buttonDefaultStyle} bg-red-500 text-white border-red-500`
-const buttonPrimaryStyle = `rounded-md bg-primary px-4 py-2 text-sm font-medium text-white cursor-pointer hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50`
+const thStyle = `whitespace-nowrap border-b border-border px-3 py-2.5 text-left text-[13px] leading-[18px] font-semibold text-text-secondary`
+const tdStyle = `whitespace-nowrap border-b border-border px-3 py-2.5 text-sm leading-5 text-text-primary`
+const buttonDefaultStyle = `rounded-md border border-border-strong px-2 py-1 text-sm font-semibold text-text-secondary cursor-pointer transition-colors enabled:hover:bg-bg-muted enabled:hover:text-text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:cursor-not-allowed disabled:opacity-50`
+const buttonDangerStyle = `rounded-md border border-danger bg-danger px-2 py-1 text-sm font-semibold text-white cursor-pointer transition-colors enabled:hover:border-danger-hover enabled:hover:bg-danger-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:cursor-not-allowed disabled:opacity-50`
+const buttonPrimaryStyle = `rounded-md bg-primary px-4 py-2 text-sm font-semibold text-white cursor-pointer transition-colors enabled:hover:bg-primary-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:cursor-not-allowed disabled:opacity-50`
 const userRoles: IUser['role'][] = ['admin', 'manager', 'editor']
 const userStatus: IUser['status'][] = ['active', 'inactive', 'pending']
 const userSorts: UserSort[] = ['createdAt:asc', 'createdAt:desc', 'name:asc', 'name:desc']

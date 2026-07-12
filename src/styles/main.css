@@ -1,9 +1,10 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 @theme {
   --color-bg-page: #f9fafb;
   --color-bg-surface: #ffffff;
   --color-bg-muted: #f3f4f6;
+  --color-bg-selected: #eff6ff;
 
   --color-border: #e5e7eb;
   --color-border-strong: #d1d5db;
@@ -17,4 +18,8 @@
 
   --radius-control: 6px;
   --radius-container: 8px;
+
+  --color-focus-ring: #93c5fd;
+  --color-danger: #dc2626;
+  --color-danger-hover: #b91c1c;
 }

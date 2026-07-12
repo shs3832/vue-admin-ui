@@ -1,6 +1,9 @@
 <template>
-  <form class="mb-4 flex flex-wrap items-end gap-3" @submit.prevent="emit('filter')">
-    <div class="flex flex-col gap-1">
+  <form
+    class="mb-4 flex flex-wrap items-end gap-3 rounded-container border border-border bg-bg-surface p-4"
+    @submit.prevent="emit('filter')"
+  >
+    <div class="flex w-full flex-col gap-1 md:w-auto">
       <label for="product-category-filter" :class="labelStyle"> 카테고리 </label>
       <select
         id="product-category-filter"
@@ -14,7 +17,7 @@
         </option>
       </select>
     </div>
-    <div class="flex flex-col gap-1">
+    <div class="flex w-full flex-col gap-1 md:w-auto">
       <label for="product-status-filter" :class="labelStyle"> 상태 </label>
       <select
         id="product-status-filter"
@@ -33,7 +36,7 @@
         </option>
       </select>
     </div>
-    <div class="flex flex-col gap-1">
+    <div class="flex w-full flex-col gap-1 md:w-auto">
       <label for="product-sort-filter" :class="labelStyle"> 정렬 </label>
       <select
         id="product-sort-filter"
@@ -55,13 +58,7 @@
         <option value="createdAt:asc">생성일 오래된순</option>
       </select>
     </div>
-    <button
-      type="button"
-      class="rounded-md border border-border-strong px-4 py-2 text-sm cursor-pointer"
-      @click="emit('reset')"
-    >
-      초기화
-    </button>
+    <button type="button" :class="buttonSecondaryStyle" @click="emit('reset')">초기화</button>
     <button type="submit" :class="buttonPrimaryStyle">필터 적용</button>
 
     <div v-if="canCreateProduct" class="ml-auto flex items-center justify-end gap-4">
@@ -74,8 +71,23 @@
 import type { IProduct, ProductsMeta, ProductsSort } from '@/types/products'
 
 const labelStyle = `text-sm font-medium text-text-secondary`
-const selectStyle = `rounded-md border border-border-strong px-3 py-2 text-sm`
-const buttonPrimaryStyle = `rounded-md bg-primary px-4 py-2 text-sm font-medium text-white`
+const selectStyle = `rounded-md border border-border-strong px-3 py-2 text-sm focus-visible:border-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring`
+const buttonPrimaryStyle = `rounded-md bg-primary px-4 py-2 text-sm font-semibold text-white
+cursor-pointer transition-colors
+hover:bg-primary-hover
+focus-visible:outline-2
+focus-visible:outline-offset-2
+focus-visible:outline-focus-ring
+disabled:cursor-not-allowed
+disabled:opacity-50`
+const buttonSecondaryStyle = `rounded-md border border-border-strong px-4 py-2
+text-sm font-semibold text-text-secondary
+cursor-pointer transition-colors
+hover:bg-bg-muted
+hover:text-text-primary
+focus-visible:outline-2
+focus-visible:outline-offset-2
+focus-visible:outline-focus-ring`
 
 defineProps<{
   selectedCategory: string
@@ -101,5 +113,3 @@ const productStatusLabels: Record<IProduct['status'], string> = {
   soldout: '품절',
 }
 </script>
-
-<style scoped></style>

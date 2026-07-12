@@ -34,111 +34,123 @@
     <div v-else>
       <div
         v-if="canBulkUpdateProductStatus && selectedProductIds.length > 0"
-        class="mb-3 flex items-center gap-3"
+        class="mb-3 flex flex-col gap-3 rounded-container border border-border bg-bg-surface p-3 sm:flex-row sm:items-center"
       >
         <p class="text-sm text-text-secondary" role="status">
           {{ selectedProductIds.length }}개 상품 선택됨
         </p>
+        <div class="flex w-full flex-col gap-2 sm:ml-auto sm:w-auto sm:flex-row">
+          <label for="bulk-product-status" class="sr-only"> 일괄 변경할 상품 상태 </label>
 
-        <label for="bulk-product-status" class="sr-only"> 일괄 변경할 상품 상태 </label>
-
-        <select
-          id="bulk-product-status"
-          v-model="bulkNextStatus"
-          :class="[selectStyle, 'max-w-48']"
-        >
-          <option value="">변경할 상태 선택</option>
-          <option value="selling">판매중</option>
-          <option value="hidden">숨김</option>
-          <option value="soldout">품절</option>
-        </select>
-        <button
-          type="button"
-          :class="buttonPrimaryStyle"
-          :disabled="!bulkNextStatus"
-          @click="handleOpenBulkStatusDialog($event)"
-        >
-          일괄 상태 변경
-        </button>
+          <select
+            id="bulk-product-status"
+            v-model="bulkNextStatus"
+            :class="[selectStyle, 'w-full sm:w-48']"
+          >
+            <option value="">변경할 상태 선택</option>
+            <option value="selling">판매중</option>
+            <option value="hidden">숨김</option>
+            <option value="soldout">품절</option>
+          </select>
+          <button
+            type="button"
+            :class="[buttonPrimaryStyle, 'w-full sm:w-auto']"
+            :disabled="!bulkNextStatus"
+            @click="handleOpenBulkStatusDialog($event)"
+          >
+            일괄 상태 변경
+          </button>
+        </div>
       </div>
-      <table class="w-full border-collapse text-sm">
-        <thead>
-          <tr>
-            <th v-if="canBulkUpdateProductStatus" :class="thStyle">
-              <input
-                type="checkbox"
-                :checked="isAllCurrentPageSelected"
-                :indeterminate="isSomeCurrentPageSelected"
-                aria-label="현재 페이지 상품 전체 선택"
-                @change="handleToggleAllCurrentPage"
-              />
-            </th>
-            <th :class="thStyle">이미지</th>
-            <th :class="thStyle">상품명</th>
-            <th :class="thStyle">카테고리</th>
-            <th :class="thStyle">가격</th>
-            <th :class="thStyle">재고</th>
-            <th :class="thStyle">상태</th>
-            <th :class="thStyle">관리</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-if="isTableLoading">
-            <td :class="[tdStyle, 'text-center']" :colspan="canBulkUpdateProductStatus ? 8 : 7">
-              제품목록을 불러오는 중입니다.
-            </td>
-          </tr>
-          <tr v-for="product in products" :key="product.id">
-            <td v-if="canBulkUpdateProductStatus" :class="tdStyle">
-              <input
-                v-model="selectedProductIds"
-                type="checkbox"
-                :value="product.id"
-                :aria-label="`${product.name} 선택`"
-              />
-            </td>
-            <td :class="tdStyle">
-              <img
-                v-if="product.thumbnailUrl"
-                :src="product.thumbnailUrl"
-                :alt="product.name"
-                class="h-12 w-12 rounded-md object-cover"
-              />
-              <div
-                v-else
-                class="flex h-12 w-12 items-center justify-center rounded-md bg-muted text-xs text-text-secondary"
-              >
-                No image
-              </div>
-            </td>
-            <td :class="tdStyle">{{ product.name }}</td>
-            <td :class="tdStyle">{{ product.category }}</td>
-            <td :class="tdStyle">{{ formatCurrency(product.price) }}</td>
-            <td :class="tdStyle">{{ product.stock }}</td>
-            <td :class="tdStyle">
-              <ProductStatusBadge :status="product.status" />
-            </td>
-            <td :class="tdStyle">
-              <button
-                v-if="canUpdateProduct"
-                :class="buttonDefaultStyle"
-                @click="handleProductEdit(product.id)"
-              >
-                수정
-              </button>
-              <button
-                v-if="canUpdateProductStatus"
-                type="button"
-                :class="[buttonDefaultStyle, canUpdateProduct ? 'ml-2' : '']"
-                @click="handleOpenStatusDialog(product, $event)"
-              >
-                상태 변경
-              </button>
-              <!-- <button type="button" :class="[buttonDangerStyle, 'ml-2']">삭제</button> -->
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <div class="overflow-x-auto rounded-container border border-border bg-bg-surface">
+        <table class="w-full min-w-[1000px] border-collapse text-sm">
+          <thead class="bg-bg-page">
+            <tr>
+              <th v-if="canBulkUpdateProductStatus" :class="thStyle">
+                <input
+                  type="checkbox"
+                  :checked="isAllCurrentPageSelected"
+                  :indeterminate="isSomeCurrentPageSelected"
+                  aria-label="현재 페이지 상품 전체 선택"
+                  @change="handleToggleAllCurrentPage"
+                  :class="checkboxStyle"
+                />
+              </th>
+              <th :class="thStyle">이미지</th>
+              <th :class="thStyle">상품명</th>
+              <th :class="thStyle">카테고리</th>
+              <th :class="thStyle">가격</th>
+              <th :class="thStyle">재고</th>
+              <th :class="thStyle">상태</th>
+              <th :class="thStyle">관리</th>
+            </tr>
+          </thead>
+          <tbody class="[&>tr:last-child>td]:border-b-0">
+            <tr v-if="isTableLoading">
+              <td :class="[tdStyle, 'text-center']" :colspan="canBulkUpdateProductStatus ? 8 : 7">
+                제품목록을 불러오는 중입니다.
+              </td>
+            </tr>
+            <tr
+              v-for="product in products"
+              :key="product.id"
+              :class="[
+                'transition-colors',
+                selectedProductIds.includes(product.id) ? 'bg-bg-selected' : 'hover:bg-bg-page',
+              ]"
+            >
+              <td v-if="canBulkUpdateProductStatus" :class="tdStyle">
+                <input
+                  v-model="selectedProductIds"
+                  type="checkbox"
+                  :value="product.id"
+                  :aria-label="`${product.name} 선택`"
+                  :class="checkboxStyle"
+                />
+              </td>
+              <td :class="tdStyle">
+                <img
+                  v-if="product.thumbnailUrl"
+                  :src="product.thumbnailUrl"
+                  :alt="product.name"
+                  class="size-10 rounded-md object-cover"
+                />
+                <div
+                  v-else
+                  class="flex size-10 items-center justify-center rounded-md bg-bg-muted text-[10px] leading-tight text-text-secondary whitespace-normal"
+                >
+                  No image
+                </div>
+              </td>
+              <td :class="tdStyle">{{ product.name }}</td>
+              <td :class="tdStyle">{{ product.category }}</td>
+              <td :class="tdStyle">{{ formatCurrency(product.price) }}</td>
+              <td :class="tdStyle">{{ product.stock }}</td>
+              <td :class="tdStyle">
+                <ProductStatusBadge :status="product.status" />
+              </td>
+              <td :class="tdStyle">
+                <button
+                  v-if="canUpdateProduct"
+                  :class="buttonDefaultStyle"
+                  @click="handleProductEdit(product.id)"
+                >
+                  수정
+                </button>
+                <button
+                  v-if="canUpdateProductStatus"
+                  type="button"
+                  :class="[buttonDefaultStyle, canUpdateProduct ? 'ml-2' : '']"
+                  @click="handleOpenStatusDialog(product, $event)"
+                >
+                  상태 변경
+                </button>
+                <!-- <button type="button" :class="[buttonDangerStyle, 'ml-2']">삭제</button> -->
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
 
       <PaginationBar v-if="pagination" :pagination="pagination" @changePage="handleChangePage" />
     </div>
@@ -226,13 +238,14 @@ import { getQueryPage, getQueryString } from '@/utils/query'
 import ProductFilterBar from '@/components/products/ProductFilterBar.vue'
 import PaginationBar from '@/components/ui/PaginationBar.vue'
 
-const thStyle = `border-b border-border px-4 py-3 text-left font-medium text-text-secondary`
-const tdStyle = `border-b border-border px-4 py-3`
-const buttonPrimaryStyle = `rounded-md bg-primary px-4 py-2 text-sm font-medium text-white cursor-pointer hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50`
-const buttonDefaultStyle = `rounded-md border border-border-strong px-2 py-1 text-sm cursor-pointer disabled:cursor-not-allowed disabled:opacity-50`
+const thStyle = `whitespace-nowrap border-b border-border px-3 py-2.5 text-left text-[13px] leading-[18px] font-semibold text-text-secondary`
+const tdStyle = `whitespace-nowrap border-b border-border px-3 py-2.5 text-sm leading-5 text-text-primary`
+const buttonDefaultStyle = `rounded-md border border-border-strong px-2 py-1 text-sm font-semibold text-text-secondary cursor-pointer transition-colors enabled:hover:bg-bg-muted enabled:hover:text-text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:cursor-not-allowed disabled:opacity-50`
+const buttonPrimaryStyle = `rounded-md bg-primary px-4 py-2 text-sm font-semibold text-white cursor-pointer transition-colors enabled:hover:bg-primary-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:cursor-not-allowed disabled:opacity-50`
 const boxStyle = `flex flex-col gap-1`
 const labelStyle = `block mb-2 text-sm font-medium text-text-secondary`
-const selectStyle = `h-9 w-full rounded-md border border-border-strong bg-white px-3 text-sm focus-visible:outline disabled:bg-muted disabled:cursor-not-allowed`
+const selectStyle = `h-9 w-full rounded-md border border-border-strong bg-bg-surface px-3 text-sm focus-visible:border-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:cursor-not-allowed disabled:bg-bg-muted disabled:opacity-50`
+const checkboxStyle = `size-4 cursor-pointer accent-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:cursor-not-allowed disabled:opacity-50`
 const errorStyle = `text-sm text-red-600`
 
 const { handleAuthError } = useAuthErrorHandler()

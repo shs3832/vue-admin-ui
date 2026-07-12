@@ -1,7 +1,10 @@
 <template>
   <section>
-    <form class="mb-4 flex flex-wrap items-end gap-3" @submit.prevent="emit('search')">
-      <div class="flex flex-col gap-1">
+    <form
+      class="mb-4 flex flex-wrap items-end gap-3 rounded-container border border-border bg-bg-surface p-4"
+      @submit.prevent="emit('search')"
+    >
+      <div class="flex flex-col w-full md:w-auto gap-1">
         <label for="user-search-keyword" :class="labelStyle">검색어</label>
         <input
           id="user-search-keyword"
@@ -12,7 +15,7 @@
           @input="emit('update:searchKeyword', ($event.target as HTMLInputElement).value)"
         />
       </div>
-      <div class="flex flex-col gap-1">
+      <div class="flex flex-col w-full md:w-auto gap-1">
         <label for="user-search-role" :class="labelStyle">역할</label>
         <select
           id="user-search-role"
@@ -31,7 +34,7 @@
           </option>
         </select>
       </div>
-      <div class="flex flex-col gap-1">
+      <div class="flex flex-col w-full md:w-auto gap-1">
         <label for="user-search-status" :class="labelStyle">상태</label>
         <select
           id="user-search-status"
@@ -50,7 +53,7 @@
           </option>
         </select>
       </div>
-      <div class="flex flex-col gap-1">
+      <div class="flex flex-col w-full md:w-auto gap-1">
         <label for="user-search-sort" :class="labelStyle">정렬</label>
         <select
           id="user-search-sort"
@@ -68,24 +71,13 @@
         </select>
       </div>
       <div class="flex flex-wrap gap-3">
-        <button
-          type="submit"
-          class="rounded-md bg-primary px-4 py-2 text-sm font-medium text-white cursor-pointer"
-        >
-          검색
-        </button>
-        <button
-          type="button"
-          class="rounded-md border border-border-strong px-4 py-2 text-sm cursor-pointer"
-          @click="emit('reset')"
-        >
-          초기화
-        </button>
+        <button type="submit" :class="buttonPrimaryStyle">검색</button>
+        <button type="button" :class="buttonSecondaryStyle" @click="emit('reset')">초기화</button>
       </div>
       <div class="flex ml-auto">
         <button
           type="button"
-          class="rounded-md bg-primary px-4 py-2 text-sm font-medium text-white cursor-pointer"
+          :class="buttonPrimaryStyle"
           @click="emit('createUser')"
           v-if="canCreateUser"
         >
@@ -100,8 +92,18 @@
 import type { IUser, UsersMeta, UserSort } from '@/types/users'
 
 const labelStyle = `text-sm font-medium text-text-secondary`
-const inputStyle = `rounded-md border border-border-strong px-3 py-2 text-sm`
-const selectStyle = `rounded-md border border-border-strong px-3 py-2 text-sm`
+const inputStyle = `rounded-md border border-border-strong px-3 py-2 text-sm focus-visible:border-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring`
+
+const selectStyle = `rounded-md border border-border-strong px-3 py-2 text-sm focus-visible:border-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring`
+const buttonPrimaryStyle = `rounded-md bg-primary px-4 py-2 text-sm font-semibold text-white
+cursor-pointer transition-colors
+hover:bg-primary-hover
+focus-visible:outline-2
+focus-visible:outline-offset-2
+focus-visible:outline-focus-ring
+disabled:cursor-not-allowed disabled:opacity-50`
+const buttonSecondaryStyle = `rounded-md border border-border-strong px-4 py-2
+text-sm font-semibold text-text-secondary cursor-pointer transition-colors hover:bg-bg-muted hover:text-text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring`
 defineProps<{
   searchKeyword: string
   searchRole: IUser['role'] | ''

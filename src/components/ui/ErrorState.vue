@@ -28,7 +28,7 @@
 </template>
 
 <script setup lang="ts">
-const props = withDefaults(
+withDefaults(
   defineProps<{
     message: string
     retryLabel?: string

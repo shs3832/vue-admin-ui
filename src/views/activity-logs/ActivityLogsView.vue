@@ -14,8 +14,8 @@
           :key="activityLog.id"
           class="rounded-md border border-border bg-bg-surface p-4"
         >
-          <div class="flex items-start justify-between gap-4">
-            <div>
+          <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+            <div class="min-w-0 flex-1">
               <p class="text-sm font-semibold text-text-primary">
                 {{ activityLog.actor }}
               </p>
@@ -24,7 +24,7 @@
               </p>
             </div>
 
-            <p class="text-xs text-text-muted">
+            <p class="shrink-0 whitespace-nowrap text-xs text-text-muted">
               {{ formatDateTime(activityLog.createdAt) }}
             </p>
           </div>

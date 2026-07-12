@@ -1,9 +1,9 @@
 <template>
-  <div class="mt-4 flex items-center justify-between text-sm">
-    <p class="text-text-secondary">
+  <div class="mt-4 flex flex-col gap-3 text-sm sm:flex-row sm:items-center sm:justify-between">
+    <p class="text-center text-text-secondary sm:text-left">
       총 {{ pagination.total }}개, {{ pagination.page }} / {{ pagination.totalPages }} 페이지
     </p>
-    <div class="flex gap-2">
+    <div class="flex max-w-full justify-center gap-1 overflow-x-auto pb-1 sm:justify-end">
       <button
         type="button"
         :class="styleButton"
@@ -37,8 +37,12 @@
 import type { PaginationMeta } from '@/types/api'
 import { computed } from 'vue'
 
-const styleButton = `rounded-md border border-border-strong px-3 py-1 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50`
-const activeButtonStyle = `${styleButton} bg-primary text-white border-primary`
+const buttonBaseStyle = `inline-flex h-8 min-w-8 shrink-0 items-center justify-center rounded-md border px-2 text-sm font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:cursor-not-allowed disabled:opacity-50`
+
+const styleButton = `${buttonBaseStyle} cursor-pointer border-border-strong text-text-secondary enabled:hover:bg-bg-muted enabled:hover:text-text-primary`
+
+const activeButtonStyle = `${buttonBaseStyle} cursor-pointer border-primary bg-primary text-white enabled:hover:bg-primary-hover`
+
 const props = defineProps<{
   pagination: PaginationMeta
 }>()

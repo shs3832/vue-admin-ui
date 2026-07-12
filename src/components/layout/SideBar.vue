@@ -5,6 +5,7 @@
         <RouterLink
           :to="item.to"
           :class="[linkStyle, activeMenu === item.activeMenu && activeLinkStyle]"
+          @click="emit('navigate')"
         >
           {{ item.label }}
         </RouterLink>
@@ -38,4 +39,7 @@ const activeMenu = computed(() => route.meta.activeMenu)
 const activeLinkStyle = 'bg-bg-muted text-text-primary'
 const linkStyle =
   'block rounded-md px-3 py-2 text-sm font-medium text-text-secondary hover:bg-bg-muted hover:text-text-primary'
+const emit = defineEmits<{
+  navigate: []
+}>()
 </script>

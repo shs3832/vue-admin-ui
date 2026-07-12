@@ -116,6 +116,7 @@ Password: account!@12
 - 공통 UI 컴포넌트 미리보기 라우트
 - LoadingState/ErrorState/EmptyState 상태별 preview
 - Users/Products/Notifications badge variant 확인
+- PaginationBar 페이지 이동과 ConfirmDialog 열기/닫기 상호작용 확인
 - 운영 화면과 분리된 내부 UI 확인 페이지
 
 ## Implementation Notes
@@ -378,17 +379,19 @@ npm run build
 - loading/empty/error 상태 처리
 - API/type/formatting/list state 책임 분리
 - 공통 LoadingState/ErrorState/EmptyState UI 패턴 정리
-- Component Preview를 통한 공통 UI 상태와 badge variant 문서화
+- Component Preview를 통한 공통 UI 상태, badge variant, interactive component 문서화
+- mobile drawer navigation과 breakpoint별 page padding 구성
+- Users/Products 필터·테이블·페이지네이션의 반응형 배치와 상태 대비 개선
+- 선택 행, hover, focus-visible, disabled 상태를 디자인 토큰과 연결
 - 백엔드 응답 구조 기반 TypeScript 타입 정의
 - 읽기 전용 운영 로그/알림 화면 구현
 - 단순 CRUD를 넘어 운영자가 조건을 공유하고 복원할 수 있는 목록 UI 구현
 
 ## Remaining Improvements
 
-- Users/Products input, select, outline button, table row 시각 대비 개선
 - 반복 스타일이 충분히 쌓인 뒤 BaseButton/BaseInput/FormField 공통화 검토
 - 벌크 일부 실패 시 상품별 실패 ID와 사유를 제공하는 API 응답 확장 검토
 - ConfirmDialog/field validation 등 후속 상호작용 테스트는 실제 회귀 위험이 커질 때 추가
-- Component Preview 확장
+- modal/drawer focus trap은 필요성과 복잡도를 비교한 뒤 후속 검토
 - React/Next 재구현 설계
 - README 최종 스크린샷/시연 이미지 추가
